@@ -204,6 +204,9 @@
       }
     ];
 
+    // CẤU HÌNH LINK GOOGLE APPS SCRIPT ĐỂ LƯU ĐIỂM
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxodKVgJhYRv9SxN5nnHsXTEI9freN-yMmhaxAN11cWTucZHgOAvjFU0lfEobppQzY/exec";
+
     let studentInfo = { name: '', class: '', id: '' };
     let userAnswers = {};
     let timerInterval = null;
@@ -370,6 +373,31 @@
 
       renderSolutions();
       if (window.lucide) lucide.createIcons();
+
+      // GỬI KẾT QUẢ VỀ GOOGLE SHEETS
+      if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL.startsWith('http')) {
+        const payload = {
+          name: studentInfo.name,
+          className: studentInfo.class,
+          id: studentInfo.id,
+          score: score,
+          correctCount: correctCount,
+          totalQuestions: examData.length,
+          timeSpentSec: timeSpentSec,
+          answers: userAnswers
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).then(function() {
+          console.log("Đã lưu điểm thành công vào Google Sheets!");
+        }).catch(function(err) {
+          console.error("Lỗi gửi dữ liệu:", err);
+        });
+      }
     }
 
     // Hiển thị lời giải
