@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ Thống Trắc Nghiệm Toán THPT Tự Động</title>
+  <title>Kiểm Tra Trực Tuyến - Lớp Toán BAT</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- KaTeX -->
@@ -21,12 +21,12 @@
       <div class="flex items-center gap-2">
         <i data-lucide="calculator" class="w-7 h-7"></i>
         <div>
-          <h1 class="text-lg font-bold leading-tight">TOÁN THPT - KIỂM TRA TRỰC TUYẾN</h1>
-          <p class="text-xs text-indigo-200">Tự động biên dịch LaTeX &amp; Hình vẽ TikZ</p>
+          <h1 class="text-base sm:text-lg font-bold leading-tight">TOÁN THPT - KIỂM TRA TRỰC TUYẾN</h1>
+          <p class="text-xs text-indigo-200">Hệ thống biên dịch LaTeX thông minh</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <button id="btn-open-admin" onclick="toggleAdmin()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-400/40">
+        <button id="btn-open-admin" onclick="toggleAdmin()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-400/40 transition">
           <i data-lucide="file-up" class="w-4 h-4"></i>
           <span>Nạp đề LaTeX</span>
         </button>
@@ -40,17 +40,17 @@
 
   <main class="max-w-5xl mx-auto p-4 flex-1 w-full">
 
-    <!-- KHU VỰC 1: DÀNH CHO THẦY QUÂN DÁN MÃ LATEX VÀ BẤM TẠO ĐỀ -->
-    <section id="panel-admin" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+    <!-- KHU VỰC NẠP ĐỀ LATEX DÀNH CHO THẦY QUÂN -->
+    <section id="panel-admin" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
       <div class="flex items-center justify-between mb-3 border-b pb-3">
         <div>
           <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <i data-lucide="code-2" class="w-5 h-5 text-indigo-600"></i>
-            Dán mã nguồn đề thi LaTeX (Gói ex-test, có kèm mã TikZ)
+            Dán mã nguồn đề thi LaTeX (Hỗ trợ ex-test, cases, array, TikZ)
           </h2>
-          <p class="text-xs text-slate-500 mt-0.5">Trang web sẽ tự bóc tách câu hỏi, chuyển khối \begin{tikzpicture} sang SVG và kích hoạt đề thi</p>
+          <p class="text-xs text-slate-500 mt-0.5">Tự động xử lý ngoặc lồng nhau, công thức hệ phương trình, phân số và hình vẽ</p>
         </div>
-        <button onclick="loadDemoLatex()" class="text-xs text-indigo-600 hover:underline font-semibold">Nạp đề mẫu có TikZ</button>
+        <button type="button" onclick="loadExamFromText(DEFAULT_LATEX_SOURCE)" class="text-xs text-indigo-600 hover:underline font-semibold">Tải 12 câu mẫu của thầy</button>
       </div>
 
       <textarea id="latex-code" rows="9" class="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed" placeholder="Dán nội dung file .tex vào đây..."></textarea>
@@ -58,28 +58,28 @@
       <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2 text-xs">
           <label class="font-semibold text-slate-700">Thời gian làm bài:</label>
-          <input type="number" id="cfg-time" value="15" class="w-16 px-2 py-1 border rounded text-center font-bold"> 
+          <input type="number" id="cfg-time" value="20" class="w-16 px-2 py-1 border rounded text-center font-bold"> 
           <span>phút</span>
         </div>
-        <button id="btn-build" onclick="handleBuildExam()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-2 transition">
+        <button id="btn-build" type="button" onclick="handleBuildFromInput()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-2 transition">
           <i data-lucide="sparkles" class="w-4 h-4"></i>
           <span>Biên Dịch &amp; Tạo Đề Online</span>
         </button>
       </div>
       <div id="parse-loading" class="hidden mt-3 text-xs text-indigo-600 font-semibold items-center gap-2">
         <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <span>Đang kết nối API dựng hình vẽ TikZ sang SVG, vui lòng đợi vài giây...</span>
+        <span>Đang phân tích cấu trúc đề và dựng hình TikZ...</span>
       </div>
     </section>
 
-    <!-- KHU VỰC 2: MÀN HÌNH HỌC SINH ĐIỀN THÔNG TIN BẮT ĐẦU -->
+    <!-- MÀN HÌNH ĐIỀN THÔNG TIN THÍ SINH -->
     <section id="screen-start" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
       <div class="text-center mb-5">
         <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-2">
           <i data-lucide="user-pen" class="w-6 h-6"></i>
         </div>
         <h2 class="text-lg font-bold text-slate-900">BÀI KIỂM TRA ĐẠI SỐ &amp; HÌNH HỌC</h2>
-        <p class="text-xs text-slate-500 mt-1">Đề thi gồm <strong id="lbl-q-count" class="text-indigo-600">0</strong> câu hỏi trắc nghiệm</p>
+        <p class="text-xs text-slate-500 mt-1">Số lượng: <strong id="lbl-q-count" class="text-indigo-600 text-sm">0</strong> câu hỏi</p>
       </div>
 
       <form id="form-start" class="space-y-3">
@@ -90,7 +90,7 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">Lớp</label>
-            <input type="text" id="stu-class" required placeholder="Ví dụ: 12A1" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <input type="text" id="stu-class" required placeholder="Ví dụ: 10A1" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">Số báo danh</label>
@@ -105,14 +105,14 @@
       </form>
     </section>
 
-    <!-- KHU VỰC 3: MÀN HÌNH LÀM BÀI CỦA THÍ SINH -->
+    <!-- GIAO DIỆN LÀM BÀI -->
     <section id="screen-exam" class="hidden grid grid-cols-1 md:grid-cols-4 gap-6">
       <aside class="md:col-span-1 order-2 md:order-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit sticky top-20">
-        <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center gap-1.5">
+        <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center gap-1.5 uppercase">
           <i data-lucide="layout-grid" class="w-4 h-4 text-indigo-600"></i>
-          BẢNG CÂU HỎI
+          Danh Sách Câu Hỏi
         </h3>
-        <div id="palette-box" class="grid grid-cols-4 gap-2 mb-4"></div>
+        <div id="palette-box" class="grid grid-cols-4 gap-2 mb-4 max-h-[60vh] overflow-y-auto pr-1"></div>
         <button type="button" onclick="confirmSubmit()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition text-xs flex items-center justify-center gap-1.5">
           <i data-lucide="check-circle" class="w-4 h-4"></i>
           Nộp Bài Thi
@@ -128,13 +128,13 @@
       </div>
     </section>
 
-    <!-- KHU VỰC 4: BÁO KẾT QUẢ & LỜI GIẢI CHI TIẾT -->
+    <!-- KẾT QUẢ & LỜI GIẢI -->
     <section id="screen-result" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
         <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2 bg-emerald-100 text-emerald-600">
           <i data-lucide="award" class="w-8 h-8"></i>
         </div>
-        <h2 class="text-xl font-bold text-slate-900">KẾT QUẢ LÀM BÀI</h2>
+        <h2 class="text-xl font-bold text-slate-900">KẾT QUẢ BÀI THI</h2>
         <p class="text-xs text-slate-500 mt-1" id="res-user-info"></p>
 
         <div class="mt-4 grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -153,21 +153,21 @@
         </div>
         <p class="text-xs text-emerald-600 mt-3 font-semibold flex items-center justify-center gap-1">
           <i data-lucide="cloud-check" class="w-4 h-4"></i>
-          Đã tự động lưu kết quả vào Google Sheets của Thầy
+          Đã đồng bộ kết quả vào Google Sheets thành công!
         </p>
       </div>
 
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
           <i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i>
-          Đáp Án &amp; Lời Giải Từng Bước
+          Đáp Án &amp; Lời Giải Chi Tiết
         </h3>
         <div id="solutions-box" class="space-y-5 divide-y divide-slate-100"></div>
       </div>
 
       <div class="text-center pb-6">
         <button onclick="location.reload()" class="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl">
-          Làm lại đề khác
+          Làm lại bài thi
         </button>
       </div>
     </section>
@@ -175,155 +175,277 @@
   </main>
 
   <script>
-    // ========================================================
-    // 1. CẤU HÌNH ĐƯỜNG LINK GOOGLE APPS SCRIPT CỦA THẦY TẠI ĐÂY
-    // ========================================================
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaBPufJqo0nJv_Oa7u5BjPwx7G5W2oQ5joyjsm8qu9CZwaT7vzZmUt4Id2yqnrAw0/exec";
+    // Link Web App Google Apps Script nhận điểm của thầy
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxodKVgJhYRv9SxN5nnHsXTEI9freN-yMmhaxAN11cWTucZHgOAvjFU0lfEobppQzY/exec";
+
+    // 12 câu hỏi thực tế của thầy được tích hợp mặc định
+    const DEFAULT_LATEX_SOURCE = `\\begin{ex}
+	Cho mệnh đề $P$: \`\`$15$ chia hết cho $3$''. Mệnh đề phủ định của mệnh đề $P$ là
+	\\choice
+{$\\overline{P}$: \`\`$15$ chia hết cho $6$''}
+{$\\overline{P}$: \`\`$15$ không chia hết cho $5$''}
+{\\True $\\overline{P}$: \`\`$15$ không chia hết cho $3$''}
+{$\\overline{P}$: \`\`$15$ là số nguyên tố''}
+\\loigiai{
+		Phủ định của khẳng định \`\`$15$ chia hết cho $3$'' là \`\`$15$ không chia hết cho $3$''.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Hệ bất phương trình nào sau đây là hệ bất phương trình bậc nhất hai ẩn?
+	\\choice
+{$\\begin{cases} x - 2y \\le 1 \\\\ x^2 + y > 0 \\end{cases}$}
+{$\\begin{cases} x + 2y < 3 \\\\ y - z \\ge 1 \\end{cases}$}
+{\\True $\\begin{cases} 2x + y - 3 \\le 0 \\\\ x - 3y + 1 > 0 \\end{cases}$}
+{$\\begin{cases} xy + 1 \\ge 0 \\\\ x - y < 2 \\end{cases}$}
+\\loigiai{
+		Hệ $\\begin{cases} 2x + y - 3 \\le 0 \\\\ x - 3y + 1 > 0 \\end{cases}$ gồm các bất phương trình bậc nhất hai ẩn $x, y$ nên là hệ bất phương trình bậc nhất hai ẩn.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Số tập hợp con của tập hợp $S = \\{a; b\\}$ là
+	\\choice
+{$1$}
+{$3$}
+{\\True $4$}
+{$2$}
+\\loigiai{
+		Tập hợp gồm $2$ phần tử có số tập hợp con là $2^2 = 4$ (gồm: $\\varnothing, \\{a\\}, \\{b\\}, \\{a; b\\}$).
+	}
+\\end{ex}
+
+\\begin{ex}
+	Cho tam giác $ABC$ có các cạnh $BC = a$, $CA = b$, $AB = c$. Mệnh đề nào sau đây là đúng?
+	\\choice
+{$a^2 = b^2 + c^2 - 2bc \\sin A$}
+{\\True $a^2 = b^2 + c^2 - 2bc \\cos A$}
+{$a^2 = b^2 + c^2 - bc \\cos A$}
+{$a^2 = b^2 + c^2 + 2bc \\cos A$}
+\\loigiai{
+		Theo định lí cosin trong tam giác $ABC$, ta có công thức: $a^2 = b^2 + c^2 - 2bc \\cos A$.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Trong các câu sau, câu nào là mệnh đề toán học?
+	\\choice
+{Hôm nay thời tiết đẹp quá!}
+{\\True Tổng ba góc trong một tam giác bằng $180^\\circ$}
+{$2x + 1 > 0$}
+{Bạn có thích học môn Toán không?}
+\\loigiai{
+		Câu \`\`Tổng ba góc trong một tam giác bằng $180^\\circ$'' là một khẳng định đúng về sự kiện toán học nên là một mệnh đề toán học. Các câu khác là câu cảm thán, câu hỏi hoặc mệnh đề chứa biến.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Bất phương trình nào sau đây là bất phương trình bậc nhất hai ẩn?
+	\\choice
+{$x + \\dfrac{1}{y} \\le 1$}
+{$2x^2 + 3y \\le 0$}
+{\\True $3x - 5y + 4 \\ge 0$}
+{$xy - 2 > 0$}
+\\loigiai{
+		Bất phương trình bậc nhất hai ẩn có dạng $ax + by + c \\ge 0$ (hoặc $>0, \\le 0, <0$) với $a$ và $b$ không đồng thời bằng $0$. Do đó $3x - 5y + 4 \\ge 0$ là bất phương trình bậc nhất hai ẩn.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Cặp số nào sau đây là một nghiệm của bất phương trình $2x - 3y + 1 > 0$?
+	\\choice
+{$(0; 1)$}
+{$(-1; 1)$}
+{\\True $(2; 1)$}
+{$(1; 2)$}
+\\loigiai{
+		Thay cặp số $(2; 1)$ vào vế trái của bất phương trình: $2 \\cdot 2 - 3 \\cdot 1 + 1 = 2 > 0$ (đúng).\\
+		Vậy $(2; 1)$ là một nghiệm của bất phương trình đã cho.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Cho tam giác $ABC$ có các cạnh $a, b, c$ và $R, r, p$ lần lượt là bán kính đường tròn ngoại tiếp, nội tiếp và nửa chu vi của tam giác. Công thức nào sau đây tính diện tích $S$ của tam giác $ABC$?
+	\\choice
+{$S = \\dfrac{abc}{2R}$}
+{$S = \\dfrac{1}{2}ab \\cos C$}
+{\\True $S = \\dfrac{1}{2}bc \\sin A$}
+{$S = pR$}
+\\loigiai{
+		Công thức tính diện tích tam giác theo hai cạnh và góc xen giữa là $S = \\dfrac{1}{2}bc \\sin A$.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Tập hợp $A = \\{x \\in \\mathbb{R} \\mid -2 \\le x < 5\\}$ được viết dưới dạng khoảng, đoạn, nửa khoảng là
+	\\choice
+{$(-2; 5)$}
+{\\True $[-2; 5)$}
+{$(-2; 5]$}
+{$[-2; 5]$}
+\\loigiai{
+		Tập hợp các số thực thoả mãn $-2 \\le x < 5$ là nửa khoảng $[-2; 5)$.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Cho tập hợp $X = \\{x \\in \\mathbb{N} \\mid (x - 2)(x^2 - 9) = 0\\}$. Viết tập hợp $X$ bằng cách liệt kê các phần tử ta được
+	\\choice
+{\\True $X = \\{2; 3\\}$}
+{$X = \\{-3; 2; 3\\}$}
+{$X = \\{2\\}$}
+{$X = \\{3\\}$}
+\\loigiai{
+		Phương trình $(x - 2)(x^2 - 9) = 0 \\Leftrightarrow \\left[\\begin{array}{l} x = 2 \\\\ x = 3 \\\\ x = -3. \\end{array}\\right.\\
+		Vì $x \\in \\mathbb{N}$ nên ta nhận $x = 2$ và $x = 3$. Vậy $X = \\{2; 3\\}$.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Cho mệnh đề $P$: \`\`$\\forall x \\in \\mathbb{R}, x^2 + 1 > 0$''. Mệnh đề phủ định $\\overline{P}$ của mệnh đề $P$ là
+	\\choice
+{$\\overline{P}$: \`\`$\\exists x \\in \\mathbb{R}, x^2 + 1 < 0$''}
+{\\True $\\overline{P}$: \`\`$\\exists x \\in \\mathbb{R}, x^2 + 1 \\le 0$''}
+{$\\overline{P}$: \`\`$\\forall x \\in \\mathbb{R}, x^2 + 1 \\le 0$''}
+{$\\overline{P}$: \`\`$\\exists x \\in \\mathbb{R}, x^2 + 1 = 0$''}
+\\loigiai{
+		Phủ định của mệnh đề \`\`$\\forall x \\in X, P(x)$'' là \`\`$\\exists x \\in X, \\overline{P(x)}$''.\\
+		Do đó phủ định của mệnh đề đã cho là \`\`$\\exists x \\in \\mathbb{R}, x^2 + 1 \\le 0$''.
+	}
+\\end{ex}
+
+\\begin{ex}
+	Giá trị của $\\cos 120^\\circ$ bằng
+	\\choice
+{\\True $-\\dfrac{1}{2}$}
+{$-\\dfrac{\\sqrt{3}}{2}$}
+{$\\dfrac{\\sqrt{3}}{2}$}
+{$\\dfrac{1}{2}$}
+\\loigiai{
+		Ta có $\\cos 120^\\circ = -\\cos(180^\\circ - 120^\\circ) = -\\cos 60^\\circ = -\\dfrac{1}{2}$.
+	}
+\\end{ex}`;
 
     let examData = [];
     let studentInfo = { name: '', class: '', id: '' };
     let userAnswers = {};
     let timerInterval = null;
-    let timeTotalSec = 15 * 60;
+    let timeTotalSec = 20 * 60;
     let timeSpentSec = 0;
-
-    // Đề mẫu có câu hỏi công thức véc-tơ và câu hỏi chứa hình vẽ TikZ
-    const DEMO_LATEX = `% ĐỀ KIỂM TRA TOÁN HỌC CÓ HÌNH TIKZ
-\\begin{ex}
-  Trong không gian $Oxyz$, cho hai véc-tơ $\\vec{u} = (1; 2; -1)$ và $\\vec{v} = (2; 0; 3)$. Tọa độ của véc-tơ $\\vec{a} = 2\\vec{u} - \\vec{v}$ là:
-  \\choice
-  {\\True $(0; 4; -5)$}
-  {$(0; 4; 1)$}
-  {$(4; 4; -5)$}
-  {$(0; -4; -5)$}
-  \\loigiai{
-    Ta có $2\\vec{u} = 2(1; 2; -1) = (2; 4; -2)$. Suy ra $\\vec{a} = 2\\vec{u} - \\vec{v} = (0; 4; -5)$.
-  }
-\\end{ex}
-
-\\begin{ex}
-  Cho hàm số bậc ba $y = f(x)$ có đồ thị như hình vẽ bên dưới:
-  \\begin{tikzpicture}[scale=0.7]
-    \\draw[->] (-2.2,0) -- (2.5,0) node[right] {$x$};
-    \\draw[->] (0,-2.2) -- (0,2.5) node[above] {$y$};
-    \\node at (-0.3,-0.3) {$O$};
-    \\draw[thick, blue, smooth, domain=-1.8:1.8] plot (\\x, {(\\x)^3 - 2*\\x});
-  \\end{tikzpicture}
-  Điểm cực đại của đồ thị hàm số đã cho là điểm nào?
-  \\choice
-  {\\True $(-0.82; 1.09)$}
-  {$(0.82; -1.09)$}
-  {$(0; 0)$}
-  {$(2; 0)$}
-  \\loigiai{
-    Dựa vào chiều biến thiên của đồ thị, hàm số đạt cực đại tại hoành độ âm nằm bên trái trục tung.
-  }
-\\end{ex}`;
-
-    function loadDemoLatex() {
-      document.getElementById('latex-code').value = DEMO_LATEX;
-    }
 
     function toggleAdmin() {
       document.getElementById('panel-admin').classList.toggle('hidden');
     }
 
     // ========================================================
-    // 2. HÀM GỌI API KROKI ĐỂ BIÊN DỊCH TIKZ SANG SVG TRỰC TUYẾN
+    // BỘ BÓC TÁCH LATEX CHUẨN THUẬT TOÁN ĐẾM NGOẶC (NESTED BRACKET PARSER)
     // ========================================================
-    async function convertTikzToSvg(tikzCode) {
-      try {
-        const fullTex = `\\documentclass[tikz,border=2pt]{standalone}
-\\usepackage{tikz}
-\\usepackage{pgfplots}
-\\pgfplotsset{compat=1.18}
-\\begin{document}
-${tikzCode}
-\\end{document}`;
+    function extractBracedBlocks(text, startIndex = 0) {
+      let blocks = [];
+      let depth = 0;
+      let current = "";
+      let recording = false;
 
-        const res = await fetch("https://kroki.io/tikz/svg", {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: fullTex
-        });
+      for (let i = startIndex; i < text.length; i++) {
+        const c = text[i];
+        const prev = i > 0 ? text[i - 1] : '';
 
-        if (res.ok) {
-          const svgData = await res.text();
-          // Bọc div canh giữa hình
-          return `<div class="my-3 flex justify-center overflow-x-auto">${svgData}</div>`;
+        if (c === '{' && prev !== '\\') {
+          if (depth === 0) {
+            recording = true;
+            current = "";
+          } else {
+            current += c;
+          }
+          depth++;
+        } else if (c === '}' && prev !== '\\') {
+          depth--;
+          if (depth === 0 && recording) {
+            blocks.push({ content: current.trim(), endIndex: i });
+            recording = false;
+          } else {
+            current += c;
+          }
+        } else if (recording) {
+          current += c;
         }
-        return `<div class="p-2 border border-amber-300 text-xs text-amber-700 bg-amber-50 rounded">[Lỗi dựng hình TikZ]</div>`;
-      } catch (e) {
-        return `<div class="p-2 text-xs text-rose-600">[Không có mạng để tải hình TikZ]</div>`;
       }
+      return blocks;
     }
 
-    // ========================================================
-    // 3. TỰ ĐỘNG BÓC TÁCH MÃ LATEX THÀNH ĐỀ ONLINE
-    // ========================================================
-    async function handleBuildExam() {
-      const raw = document.getElementById('latex-code').value.trim();
-      if (!raw) {
-        alert("Thầy hãy dán mã LaTeX đề thi vào ô trước nhé!");
-        return;
-      }
+    function cleanLatexText(str) {
+      return str
+        .replace(/``/g, '“')
+        .replace(/''/g, '”')
+        .replace(/\\\\\s*$/g, '')
+        .trim();
+    }
 
-      const loader = document.getElementById('parse-loading');
-      loader.classList.remove('hidden');
-      loader.classList.add('flex');
-
-      const exRegex = /\\begin\{ex\}([\s\S]*?)\\end\{ex\}/g;
-      const parsedList = [];
+    async function parseLatexExam(rawSource) {
+      // 1. Loại bỏ chú thích và đường dẫn file (%E:\...)
+      let cleaned = rawSource.replace(/(^|[^\\])%.*$/gm, '$1').replace(/\r\n/g, '\n');
+      
+      const parsed = [];
+      const exRegex = /\\begin\{(ex|bt)\}([\s\S]*?)\\end\{\1\}/g;
       let match;
 
-      while ((match = exRegex.exec(raw)) !== null) {
-        let block = match[1].trim();
-        let solution = "Chưa có lời giải chi tiết.";
+      while ((match = exRegex.exec(cleaned)) !== null) {
+        let block = match[2].trim();
+        let solution = "Không có lời giải chi tiết.";
 
-        // Bóc tách \loigiai{...}
-        const lgMatch = block.match(/\\loigiai\{([\s\S]*?)\}$/);
-        if (lgMatch) {
-          solution = lgMatch[1].trim();
-          block = block.replace(lgMatch[0], '').trim();
+        // Bóc tách \loigiai{...} bằng thuật toán cặp ngoặc
+        const lgIdx = block.indexOf('\\loigiai');
+        if (lgIdx !== -1) {
+          const lgBlocks = extractBracedBlocks(block, lgIdx);
+          if (lgBlocks.length > 0) {
+            solution = cleanLatexText(lgBlocks[0].content);
+            block = block.substring(0, lgIdx).trim();
+          }
         }
 
-        // Tách câu hỏi và 4 đáp án \choice
+        // Bóc tách 4 phương án \choice
         const choiceIdx = block.indexOf('\\choice');
         let questionText = block;
         let options = [];
         let correctIdx = 0;
 
         if (choiceIdx !== -1) {
-          questionText = block.substring(0, choiceIdx).trim();
-          const choicePart = block.substring(choiceIdx + 7).trim();
+          questionText = cleanLatexText(block.substring(0, choiceIdx).trim());
+          const choicesBlock = block.substring(choiceIdx + 7);
+          const optBlocks = extractBracedBlocks(choicesBlock);
 
-          const optRegex = /\{([\s\S]*?)\}/g;
-          let optMatch;
-          let cIdx = 0;
-          while ((optMatch = optRegex.exec(choicePart)) !== null && cIdx < 4) {
-            let optVal = optMatch[1].trim();
-            if (optVal.includes('\\True')) {
-              correctIdx = cIdx;
-              optVal = optVal.replace(/\\True\s*/g, '').trim();
+          for (let i = 0; i < Math.min(optBlocks.length, 4); i++) {
+            let optStr = optBlocks[i].content.trim();
+            if (optStr.startsWith('\\True') || optStr.includes('\\True')) {
+              correctIdx = i;
+              optStr = optStr.replace(/\\True\s*/g, '').trim();
             }
-            options.push(optVal);
-            cIdx++;
+            options.push(cleanLatexText(optStr));
           }
         }
 
-        // Tự động tìm và thay thế mã TikZ thành SVG
+        // Nếu có hình TikZ: tự động gọi Kroki chuyển sang SVG
         const tikzRegex = /\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/g;
         const tikzMatches = questionText.match(tikzRegex);
         if (tikzMatches) {
           for (let tikzCode of tikzMatches) {
-            const svgHtml = await convertTikzToSvg(tikzCode);
-            questionText = questionText.replace(tikzCode, svgHtml);
+            try {
+              const res = await fetch("https://kroki.io/tikz/svg", {
+                method: "POST",
+                headers: { "Content-Type": "text/plain" },
+                body: `\\documentclass[tikz,border=2pt]{standalone}\\usepackage{tikz,pgfplots}\\begin{document}${tikzCode}\\end{document}`
+              });
+              if (res.ok) {
+                const svg = await res.text();
+                questionText = questionText.replace(tikzCode, `<div class="my-3 flex justify-center overflow-x-auto">${svg}</div>`);
+              }
+            } catch (err) {}
           }
         }
 
         if (options.length === 4) {
-          parsedList.push({
-            id: parsedList.length + 1,
+          parsed.push({
+            id: parsed.length + 1,
             question: questionText,
             options: options,
             answer: correctIdx,
@@ -332,20 +454,39 @@ ${tikzCode}
         }
       }
 
+      return parsed;
+    }
+
+    async function handleBuildFromInput() {
+      const raw = document.getElementById('latex-code').value.trim();
+      if (!raw) {
+        alert("Vui lòng dán mã LaTeX đề thi vào khung!");
+        return;
+      }
+      await loadExamFromText(raw);
+    }
+
+    async function loadExamFromText(texSource) {
+      const loader = document.getElementById('parse-loading');
+      loader.classList.remove('hidden');
+      loader.classList.add('flex');
+
+      const result = await parseLatexExam(texSource);
+
       loader.classList.add('hidden');
       loader.classList.remove('flex');
 
-      if (parsedList.length === 0) {
-        alert("Không nhận diện được câu hỏi nào! Thầy kiểm tra lại cú pháp \\begin{ex}...\\choice{...}{...}{...}{...}\\end{ex}");
+      if (result.length === 0) {
+        alert("Không nhận diện được câu hỏi nào! Thầy hãy kiểm tra lại cấu trúc file TeX.");
         return;
       }
 
-      examData = parsedList;
-      timeTotalSec = (parseInt(document.getElementById('cfg-time').value) || 15) * 60;
+      examData = result;
+      timeTotalSec = (parseInt(document.getElementById('cfg-time').value) || 20) * 60;
       document.getElementById('lbl-q-count').innerText = examData.length;
       document.getElementById('panel-admin').classList.add('hidden');
 
-      alert(`Đã biên dịch thành công ${examData.length} câu hỏi (kể cả hình vẽ TikZ)! Sẵn sàng làm bài.`);
+      alert(`Đã nhận diện thành công toàn bộ ${examData.length} câu hỏi trắc nghiệm!`);
     }
 
     function renderMath(dom) {
@@ -360,14 +501,8 @@ ${tikzCode}
       }
     }
 
-    // Thí sinh bấm Bắt đầu
-    document.getElementById('form-start').addEventListener('submit', async function(e) {
+    document.getElementById('form-start').addEventListener('submit', function(e) {
       e.preventDefault();
-      if (examData.length === 0) {
-        loadDemoLatex();
-        await handleBuildExam();
-      }
-
       studentInfo.name = document.getElementById('stu-name').value.trim();
       studentInfo.class = document.getElementById('stu-class').value.trim();
       studentInfo.id = document.getElementById('stu-id').value.trim() || 'N/A';
@@ -394,7 +529,6 @@ ${tikzCode}
       const letters = ['A', 'B', 'C', 'D'];
 
       examData.forEach((q, idx) => {
-        // Nút palette
         const btn = document.createElement('button');
         btn.id = `palette-btn-${idx}`;
         btn.type = 'button';
@@ -403,7 +537,6 @@ ${tikzCode}
         btn.onclick = () => document.getElementById(`q-card-${idx}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
         palette.appendChild(btn);
 
-        // Khung câu hỏi
         const card = document.createElement('div');
         card.id = `q-card-${idx}`;
         card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-slate-200';
@@ -455,7 +588,7 @@ ${tikzCode}
         let remain = timeTotalSec - timeSpentSec;
         if (remain <= 0) {
           clearInterval(timerInterval);
-          alert("Hết giờ làm bài! Hệ thống tự động thu bài.");
+          alert("Hết giờ làm bài! Hệ thống tự động nộp bài.");
           submitExam();
           return;
         }
@@ -475,9 +608,6 @@ ${tikzCode}
       submitExam();
     }
 
-    // ========================================================
-    // 4. NỘP BÀI & GỬI DỮ LIỆU ĐẾN GOOGLE SHEETS QUA FORM ẨN (100% THÀNH CÔNG)
-    // ========================================================
     function submitExam() {
       clearInterval(timerInterval);
 
@@ -503,7 +633,7 @@ ${tikzCode}
       renderSolutions();
       lucide.createIcons();
 
-      // Gửi điểm số về Google Sheets
+      // Đẩy điểm số về Google Sheets
       sendScoreToGoogleSheet({
         name: studentInfo.name,
         className: studentInfo.class,
@@ -579,8 +709,10 @@ ${tikzCode}
       renderMath(container);
     }
 
-    window.onload = function() {
-      loadDemoLatex();
+    window.onload = async function() {
+      // Tự động phân tích ngay 12 câu của thầy khi tải trang
+      document.getElementById('latex-code').value = DEFAULT_LATEX_SOURCE;
+      await loadExamFromText(DEFAULT_LATEX_SOURCE);
       lucide.createIcons();
     };
   </script>
