@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hệ Thống Kiểm Tra Trắc Nghiệm Trực Tuyến</title>
+  <title>Hệ Thống Trắc Nghiệm Toán THPT Tự Động</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- KaTeX -->
@@ -13,20 +13,24 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen font-sans flex flex-col">
+<body class="bg-slate-100 text-slate-800 min-h-screen font-sans flex flex-col">
 
   <!-- Header -->
-  <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-30">
+  <header class="bg-indigo-700 text-white shadow sticky top-0 z-30">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <i data-lucide="graduation-cap" class="w-7 h-7"></i>
+        <i data-lucide="calculator" class="w-7 h-7"></i>
         <div>
-          <h1 class="text-lg font-bold leading-tight">THPT - BÀI KIỂM TRA TRẮC NGHIỆM</h1>
-          <p class="text-xs text-indigo-200">Môn: Toán &amp; Vật lí</p>
+          <h1 class="text-lg font-bold leading-tight">TOÁN THPT - KIỂM TRA TRỰC TUYẾN</h1>
+          <p class="text-xs text-indigo-200">Tự động biên dịch LaTeX &amp; Hình vẽ TikZ</p>
         </div>
       </div>
-      <div id="header-right" class="hidden items-center gap-3">
-        <div class="flex items-center gap-1.5 bg-indigo-900/60 px-3 py-1.5 rounded-full text-sm font-semibold">
+      <div class="flex items-center gap-2">
+        <button id="btn-open-admin" onclick="toggleAdmin()" class="bg-indigo-800 hover:bg-indigo-900 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 border border-indigo-400/40">
+          <i data-lucide="file-up" class="w-4 h-4"></i>
+          <span>Nạp đề LaTeX</span>
+        </button>
+        <div id="timer-box" class="hidden items-center gap-1.5 bg-indigo-900 px-3 py-1.5 rounded-full text-sm font-semibold">
           <i data-lucide="clock" class="w-4 h-4 text-amber-300"></i>
           <span id="timer-display" class="font-mono text-amber-200">15:00</span>
         </div>
@@ -34,117 +38,136 @@
     </div>
   </header>
 
-  <!-- Main Container -->
   <main class="max-w-5xl mx-auto p-4 flex-1 w-full">
 
-    <!-- Screen 1: Nhập thông tin học sinh -->
-    <section id="screen-start" class="max-w-lg mx-auto mt-8 bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
-      <div class="text-center mb-6">
-        <div class="w-14 h-14 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-3">
-          <i data-lucide="user-check" class="w-7 h-7"></i>
+    <!-- KHU VỰC 1: DÀNH CHO THẦY QUÂN DÁN MÃ LATEX VÀ BẤM TẠO ĐỀ -->
+    <section id="panel-admin" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+      <div class="flex items-center justify-between mb-3 border-b pb-3">
+        <div>
+          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <i data-lucide="code-2" class="w-5 h-5 text-indigo-600"></i>
+            Dán mã nguồn đề thi LaTeX (Gói ex-test, có kèm mã TikZ)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Trang web sẽ tự bóc tách câu hỏi, chuyển khối \begin{tikzpicture} sang SVG và kích hoạt đề thi</p>
         </div>
-        <h2 class="text-xl font-bold text-slate-900">Thông Tin Thí Sinh</h2>
-        <p class="text-sm text-slate-500 mt-1">Điền họ tên và lớp để bắt đầu tính giờ làm bài</p>
+        <button onclick="loadDemoLatex()" class="text-xs text-indigo-600 hover:underline font-semibold">Nạp đề mẫu có TikZ</button>
       </div>
 
-      <form id="form-start" class="space-y-4">
+      <textarea id="latex-code" rows="9" class="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed" placeholder="Dán nội dung file .tex vào đây..."></textarea>
+
+      <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs">
+          <label class="font-semibold text-slate-700">Thời gian làm bài:</label>
+          <input type="number" id="cfg-time" value="15" class="w-16 px-2 py-1 border rounded text-center font-bold"> 
+          <span>phút</span>
+        </div>
+        <button id="btn-build" onclick="handleBuildExam()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-2 transition">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Biên Dịch &amp; Tạo Đề Online</span>
+        </button>
+      </div>
+      <div id="parse-loading" class="hidden mt-3 text-xs text-indigo-600 font-semibold items-center gap-2">
+        <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <span>Đang kết nối API dựng hình vẽ TikZ sang SVG, vui lòng đợi vài giây...</span>
+      </div>
+    </section>
+
+    <!-- KHU VỰC 2: MÀN HÌNH HỌC SINH ĐIỀN THÔNG TIN BẮT ĐẦU -->
+    <section id="screen-start" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-2">
+          <i data-lucide="user-pen" class="w-6 h-6"></i>
+        </div>
+        <h2 class="text-lg font-bold text-slate-900">BÀI KIỂM TRA ĐẠI SỐ &amp; HÌNH HỌC</h2>
+        <p class="text-xs text-slate-500 mt-1">Đề thi gồm <strong id="lbl-q-count" class="text-indigo-600">0</strong> câu hỏi trắc nghiệm</p>
+      </div>
+
+      <form id="form-start" class="space-y-3">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Họ và tên thí sinh</label>
-          <input type="text" id="student-name" required placeholder="Ví dụ: Nguyễn Văn An" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+          <label class="block text-xs font-medium text-slate-700 mb-1">Họ và tên thí sinh</label>
+          <input type="text" id="stu-name" required placeholder="Ví dụ: Trần Văn Nam" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Lớp</label>
-            <input type="text" id="student-class" required placeholder="Ví dụ: 12A1" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Lớp</label>
+            <input type="text" id="stu-class" required placeholder="Ví dụ: 12A1" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Mã số (SBD)</label>
-            <input type="text" id="student-id" placeholder="Tùy chọn" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            <label class="block text-xs font-medium text-slate-700 mb-1">Số báo danh</label>
+            <input type="text" id="stu-id" placeholder="Tùy chọn" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
         </div>
 
-        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1.5 mt-2">
-          <p class="font-semibold text-slate-700">Quy định bài làm:</p>
-          <p>• Thời gian: <strong>15 phút</strong> (hệ thống tự động nộp khi hết giờ).</p>
-          <p>• Số lượng: <strong>4 câu hỏi</strong> kết hợp Toán &amp; Vật lí.</p>
-          <p>• Mỗi câu hỏi chỉ chọn 01 phương án đúng duy nhất.</p>
-        </div>
-
-        <button type="submit" class="w-full mt-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center gap-2">
+        <button type="submit" class="w-full mt-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition text-sm flex items-center justify-center gap-2">
           <span>BẮT ĐẦU LÀM BÀI</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </button>
       </form>
     </section>
 
-    <!-- Screen 2: Giao diện làm bài -->
+    <!-- KHU VỰC 3: MÀN HÌNH LÀM BÀI CỦA THÍ SINH -->
     <section id="screen-exam" class="hidden grid grid-cols-1 md:grid-cols-4 gap-6">
-      <!-- Cột bên trái: Bảng điều hướng câu hỏi -->
       <aside class="md:col-span-1 order-2 md:order-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit sticky top-20">
-        <h3 class="font-bold text-sm text-slate-700 mb-3 flex items-center gap-2">
+        <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center gap-1.5">
           <i data-lucide="layout-grid" class="w-4 h-4 text-indigo-600"></i>
-          Danh Sách Câu Hỏi
+          BẢNG CÂU HỎI
         </h3>
-        <div id="question-palette" class="grid grid-cols-4 gap-2 mb-4"></div>
-        <div class="text-xs text-slate-500 space-y-1 border-t pt-3">
-          <div class="flex items-center gap-2"><span class="w-3 h-3 bg-indigo-600 rounded"></span> Đã chọn</div>
-          <div class="flex items-center gap-2"><span class="w-3 h-3 bg-slate-100 border border-slate-300 rounded"></span> Chưa chọn</div>
-        </div>
-
-        <button id="btn-submit-exam" type="button" class="w-full mt-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow transition text-sm flex items-center justify-center gap-2">
+        <div id="palette-box" class="grid grid-cols-4 gap-2 mb-4"></div>
+        <button type="button" onclick="confirmSubmit()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition text-xs flex items-center justify-center gap-1.5">
           <i data-lucide="check-circle" class="w-4 h-4"></i>
           Nộp Bài Thi
         </button>
       </aside>
 
-      <!-- Cột câu hỏi chính -->
-      <div class="md:col-span-3 order-1 md:order-2 space-y-6">
-        <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-xl flex items-center justify-between text-sm">
-          <span class="text-slate-700 font-medium">Thí sinh: <strong id="exam-user-badge" class="text-indigo-900"></strong></span>
-          <span class="text-slate-500 text-xs">Tổng số: 4 câu</span>
+      <div class="md:col-span-3 order-1 md:order-2 space-y-5">
+        <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex items-center justify-between text-xs">
+          <span class="text-slate-700">Học sinh: <strong id="exam-user-label" class="text-indigo-900 font-bold"></strong></span>
+          <span id="exam-progress-label" class="text-slate-500 font-medium">Tiến độ: 0/0</span>
         </div>
-
-        <div id="questions-container" class="space-y-6"></div>
+        <div id="questions-box" class="space-y-5"></div>
       </div>
     </section>
 
-    <!-- Screen 3: Kết quả & Lời giải -->
+    <!-- KHU VỰC 4: BÁO KẾT QUẢ & LỜI GIẢI CHI TIẾT -->
     <section id="screen-result" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 bg-emerald-100 text-emerald-600">
-          <i data-lucide="award" class="w-9 h-9"></i>
+        <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2 bg-emerald-100 text-emerald-600">
+          <i data-lucide="award" class="w-8 h-8"></i>
         </div>
-        <h2 class="text-2xl font-bold text-slate-900">KẾT QUẢ BÀI THI</h2>
-        <p class="text-sm text-slate-500 mt-1">Thí sinh: <span id="res-student-info" class="font-semibold text-slate-800"></span></p>
+        <h2 class="text-xl font-bold text-slate-900">KẾT QUẢ LÀM BÀI</h2>
+        <p class="text-xs text-slate-500 mt-1" id="res-user-info"></p>
 
-        <div class="mt-6 grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+        <div class="mt-4 grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
           <div>
             <p class="text-xs text-slate-500">Điểm số</p>
             <p id="res-score" class="text-2xl font-black text-indigo-600 mt-1">0/10</p>
           </div>
           <div>
             <p class="text-xs text-slate-500">Số câu đúng</p>
-            <p id="res-correct" class="text-2xl font-black text-emerald-600 mt-1">0/4</p>
+            <p id="res-correct" class="text-2xl font-black text-emerald-600 mt-1">0/0</p>
           </div>
           <div>
             <p class="text-xs text-slate-500">Thời gian làm</p>
             <p id="res-time" class="text-2xl font-black text-slate-700 mt-1">00:00</p>
           </div>
         </div>
+        <p class="text-xs text-emerald-600 mt-3 font-semibold flex items-center justify-center gap-1">
+          <i data-lucide="cloud-check" class="w-4 h-4"></i>
+          Đã tự động lưu kết quả vào Google Sheets của Thầy
+        </p>
       </div>
 
-      <!-- Khung lời giải chi tiết -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-        <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-          <i data-lucide="book-open-check" class="w-5 h-5 text-indigo-600"></i>
-          Đáp Án &amp; Lời Giải Chi Tiết
+        <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i>
+          Đáp Án &amp; Lời Giải Từng Bước
         </h3>
-        <div id="solutions-container" class="space-y-6 divide-y divide-slate-100"></div>
+        <div id="solutions-box" class="space-y-5 divide-y divide-slate-100"></div>
       </div>
 
       <div class="text-center pb-6">
-        <button onclick="location.reload()" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold rounded-xl shadow transition">
-          Làm Lại Bài Thi
+        <button onclick="location.reload()" class="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl">
+          Làm lại đề khác
         </button>
       </div>
     </section>
@@ -152,146 +175,256 @@
   </main>
 
   <script>
-    // Dữ liệu đề thi
-    const examData = [
-      {
-        id: 1,
-        question: "Trong không gian $Oxyz$, cho hai véc-tơ $\\vec{u} = (1; 2; -1)$ và $\\vec{v} = (2; 0; 3)$. Tọa độ của véc-tơ $\\vec{a} = 2\\vec{u} - \\vec{v}$ là:",
-        options: [
-          "$(0; 4; -5)$",
-          "$(0; 4; 1)$",
-          "$(4; 4; -5)$",
-          "$(0; -4; -5)$"
-        ],
-        answer: 0,
-        solution: "Ta có $2\\vec{u} = 2(1; 2; -1) = (2; 4; -2)$.<br>Suy ra $\\vec{a} = 2\\vec{u} - \\vec{v} = (2 - 2;\\ 4 - 0;\\ -2 - 3) = (0; 4; -5)$."
-      },
-      {
-        id: 2,
-        question: "Tính tích phân $I = \\int_{0}^{1} (2x + 1)\\,dx$.",
-        options: [
-          "$1$",
-          "$2$",
-          "$3$",
-          "$\\frac{3}{2}$"
-        ],
-        answer: 1,
-        solution: "Ta có nguyên hàm: $\\int (2x + 1)\\,dx = x^2 + x$.<br>Do đó $I = \\left[ x^2 + x \\right]_{0}^{1} = (1^2 + 1) - (0) = 2$."
-      },
-      {
-        id: 3,
-        question: "Một vật dao động điều hòa theo phương trình $x = 5\\cos(4\\pi t - \\frac{\\pi}{3})\\text{ (cm)}$. Tần số góc và biên độ dao động của vật lần lượt là:",
-        options: [
-          "$\\omega = 4\\pi\\text{ rad/s},\\ A = 5\\text{ cm}$",
-          "$\\omega = 5\\text{ rad/s},\\ A = 4\\pi\\text{ cm}$",
-          "$\\omega = 2\\text{ rad/s},\\ A = 5\\text{ cm}$",
-          "$\\omega = 4\\pi\\text{ rad/s},\\ A = -5\\text{ cm}$"
-        ],
-        answer: 0,
-        solution: "Phương trình dao động điều hòa tổng quát có dạng $x = A\\cos(\\omega t + \\varphi)$. Đối chiếu ta được $A = 5\\text{ cm}$ và $\\omega = 4\\pi\\text{ rad/s}$."
-      },
-      {
-        id: 4,
-        question: "Cho mạch điện xoay chiều gồm điện trở $R = 30\\,\\Omega$ mắc nối tiếp với cuộn cảm thuần có cảm kháng $Z_L = 40\\,\\Omega$. Tổng trở $Z$ của đoạn mạch là:",
-        options: [
-          "$70\\,\\Omega$",
-          "$10\\,\\Omega$",
-          "$50\\,\\Omega$",
-          "$1200\\,\\Omega$"
-        ],
-        answer: 2,
-        solution: "Tổng trở mạch nối tiếp $RL$ là $Z = \\sqrt{R^2 + Z_L^2} = \\sqrt{30^2 + 40^2} = 50\\,\\Omega$."
-      }
-    ];
+    // ========================================================
+    // 1. CẤU HÌNH ĐƯỜNG LINK GOOGLE APPS SCRIPT CỦA THẦY TẠI ĐÂY
+    // ========================================================
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaBPufJqo0nJv_Oa7u5BjPwx7G5W2oQ5joyjsm8qu9CZwaT7vzZmUt4Id2yqnrAw0/exec";
 
-    // CẤU HÌNH LINK GOOGLE APPS SCRIPT ĐỂ LƯU ĐIỂM
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxodKVgJhYRv9SxN5nnHsXTEI9freN-yMmhaxAN11cWTucZHgOAvjFU0lfEobppQzY/exec";
-
+    let examData = [];
     let studentInfo = { name: '', class: '', id: '' };
     let userAnswers = {};
     let timerInterval = null;
     let timeTotalSec = 15 * 60;
     let timeSpentSec = 0;
 
-    function renderMath(domElement) {
-      if (window.renderMathInElement) {
-        try {
-          renderMathInElement(domElement || document.body, {
-            delimiters: [
-              { left: "$$", right: "$$", display: true },
-              { left: "$", right: "$", display: false }
-            ],
-            throwOnError: false
-          });
-        } catch(e) {
-          console.error("Lỗi kết xuất công thức:", e);
+    // Đề mẫu có câu hỏi công thức véc-tơ và câu hỏi chứa hình vẽ TikZ
+    const DEMO_LATEX = `% ĐỀ KIỂM TRA TOÁN HỌC CÓ HÌNH TIKZ
+\\begin{ex}
+  Trong không gian $Oxyz$, cho hai véc-tơ $\\vec{u} = (1; 2; -1)$ và $\\vec{v} = (2; 0; 3)$. Tọa độ của véc-tơ $\\vec{a} = 2\\vec{u} - \\vec{v}$ là:
+  \\choice
+  {\\True $(0; 4; -5)$}
+  {$(0; 4; 1)$}
+  {$(4; 4; -5)$}
+  {$(0; -4; -5)$}
+  \\loigiai{
+    Ta có $2\\vec{u} = 2(1; 2; -1) = (2; 4; -2)$. Suy ra $\\vec{a} = 2\\vec{u} - \\vec{v} = (0; 4; -5)$.
+  }
+\\end{ex}
+
+\\begin{ex}
+  Cho hàm số bậc ba $y = f(x)$ có đồ thị như hình vẽ bên dưới:
+  \\begin{tikzpicture}[scale=0.7]
+    \\draw[->] (-2.2,0) -- (2.5,0) node[right] {$x$};
+    \\draw[->] (0,-2.2) -- (0,2.5) node[above] {$y$};
+    \\node at (-0.3,-0.3) {$O$};
+    \\draw[thick, blue, smooth, domain=-1.8:1.8] plot (\\x, {(\\x)^3 - 2*\\x});
+  \\end{tikzpicture}
+  Điểm cực đại của đồ thị hàm số đã cho là điểm nào?
+  \\choice
+  {\\True $(-0.82; 1.09)$}
+  {$(0.82; -1.09)$}
+  {$(0; 0)$}
+  {$(2; 0)$}
+  \\loigiai{
+    Dựa vào chiều biến thiên của đồ thị, hàm số đạt cực đại tại hoành độ âm nằm bên trái trục tung.
+  }
+\\end{ex}`;
+
+    function loadDemoLatex() {
+      document.getElementById('latex-code').value = DEMO_LATEX;
+    }
+
+    function toggleAdmin() {
+      document.getElementById('panel-admin').classList.toggle('hidden');
+    }
+
+    // ========================================================
+    // 2. HÀM GỌI API KROKI ĐỂ BIÊN DỊCH TIKZ SANG SVG TRỰC TUYẾN
+    // ========================================================
+    async function convertTikzToSvg(tikzCode) {
+      try {
+        const fullTex = `\\documentclass[tikz,border=2pt]{standalone}
+\\usepackage{tikz}
+\\usepackage{pgfplots}
+\\pgfplotsset{compat=1.18}
+\\begin{document}
+${tikzCode}
+\\end{document}`;
+
+        const res = await fetch("https://kroki.io/tikz/svg", {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: fullTex
+        });
+
+        if (res.ok) {
+          const svgData = await res.text();
+          // Bọc div canh giữa hình
+          return `<div class="my-3 flex justify-center overflow-x-auto">${svgData}</div>`;
         }
+        return `<div class="p-2 border border-amber-300 text-xs text-amber-700 bg-amber-50 rounded">[Lỗi dựng hình TikZ]</div>`;
+      } catch (e) {
+        return `<div class="p-2 text-xs text-rose-600">[Không có mạng để tải hình TikZ]</div>`;
       }
     }
 
-    // Nút Bắt đầu làm bài
-    document.getElementById('form-start').addEventListener('submit', function(e) {
+    // ========================================================
+    // 3. TỰ ĐỘNG BÓC TÁCH MÃ LATEX THÀNH ĐỀ ONLINE
+    // ========================================================
+    async function handleBuildExam() {
+      const raw = document.getElementById('latex-code').value.trim();
+      if (!raw) {
+        alert("Thầy hãy dán mã LaTeX đề thi vào ô trước nhé!");
+        return;
+      }
+
+      const loader = document.getElementById('parse-loading');
+      loader.classList.remove('hidden');
+      loader.classList.add('flex');
+
+      const exRegex = /\\begin\{ex\}([\s\S]*?)\\end\{ex\}/g;
+      const parsedList = [];
+      let match;
+
+      while ((match = exRegex.exec(raw)) !== null) {
+        let block = match[1].trim();
+        let solution = "Chưa có lời giải chi tiết.";
+
+        // Bóc tách \loigiai{...}
+        const lgMatch = block.match(/\\loigiai\{([\s\S]*?)\}$/);
+        if (lgMatch) {
+          solution = lgMatch[1].trim();
+          block = block.replace(lgMatch[0], '').trim();
+        }
+
+        // Tách câu hỏi và 4 đáp án \choice
+        const choiceIdx = block.indexOf('\\choice');
+        let questionText = block;
+        let options = [];
+        let correctIdx = 0;
+
+        if (choiceIdx !== -1) {
+          questionText = block.substring(0, choiceIdx).trim();
+          const choicePart = block.substring(choiceIdx + 7).trim();
+
+          const optRegex = /\{([\s\S]*?)\}/g;
+          let optMatch;
+          let cIdx = 0;
+          while ((optMatch = optRegex.exec(choicePart)) !== null && cIdx < 4) {
+            let optVal = optMatch[1].trim();
+            if (optVal.includes('\\True')) {
+              correctIdx = cIdx;
+              optVal = optVal.replace(/\\True\s*/g, '').trim();
+            }
+            options.push(optVal);
+            cIdx++;
+          }
+        }
+
+        // Tự động tìm và thay thế mã TikZ thành SVG
+        const tikzRegex = /\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/g;
+        const tikzMatches = questionText.match(tikzRegex);
+        if (tikzMatches) {
+          for (let tikzCode of tikzMatches) {
+            const svgHtml = await convertTikzToSvg(tikzCode);
+            questionText = questionText.replace(tikzCode, svgHtml);
+          }
+        }
+
+        if (options.length === 4) {
+          parsedList.push({
+            id: parsedList.length + 1,
+            question: questionText,
+            options: options,
+            answer: correctIdx,
+            solution: solution
+          });
+        }
+      }
+
+      loader.classList.add('hidden');
+      loader.classList.remove('flex');
+
+      if (parsedList.length === 0) {
+        alert("Không nhận diện được câu hỏi nào! Thầy kiểm tra lại cú pháp \\begin{ex}...\\choice{...}{...}{...}{...}\\end{ex}");
+        return;
+      }
+
+      examData = parsedList;
+      timeTotalSec = (parseInt(document.getElementById('cfg-time').value) || 15) * 60;
+      document.getElementById('lbl-q-count').innerText = examData.length;
+      document.getElementById('panel-admin').classList.add('hidden');
+
+      alert(`Đã biên dịch thành công ${examData.length} câu hỏi (kể cả hình vẽ TikZ)! Sẵn sàng làm bài.`);
+    }
+
+    function renderMath(dom) {
+      if (window.renderMathInElement) {
+        renderMathInElement(dom || document.body, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // Thí sinh bấm Bắt đầu
+    document.getElementById('form-start').addEventListener('submit', async function(e) {
       e.preventDefault();
-      studentInfo.name = document.getElementById('student-name').value.trim();
-      studentInfo.class = document.getElementById('student-class').value.trim();
-      studentInfo.id = document.getElementById('student-id').value.trim() || 'N/A';
+      if (examData.length === 0) {
+        loadDemoLatex();
+        await handleBuildExam();
+      }
 
-      document.getElementById('exam-user-badge').innerText = studentInfo.name + ' (' + studentInfo.class + ')';
+      studentInfo.name = document.getElementById('stu-name').value.trim();
+      studentInfo.class = document.getElementById('stu-class').value.trim();
+      studentInfo.id = document.getElementById('stu-id').value.trim() || 'N/A';
+
+      document.getElementById('exam-user-label').innerText = `${studentInfo.name} (${studentInfo.class})`;
       document.getElementById('screen-start').classList.add('hidden');
+      document.getElementById('panel-admin').classList.add('hidden');
+      document.getElementById('btn-open-admin').classList.add('hidden');
       document.getElementById('screen-exam').classList.remove('hidden');
-      document.getElementById('header-right').classList.remove('hidden');
-      document.getElementById('header-right').classList.add('flex');
+      document.getElementById('timer-box').classList.remove('hidden');
+      document.getElementById('timer-box').classList.add('flex');
 
-      initExam();
-      startTimer();
-      if (window.lucide) lucide.createIcons();
+      buildQuestionsUI();
+      startExamTimer();
+      lucide.createIcons();
     });
 
-    // Tạo đề thi
-    function initExam() {
-      const container = document.getElementById('questions-container');
-      const palette = document.getElementById('question-palette');
+    function buildQuestionsUI() {
+      const container = document.getElementById('questions-box');
+      const palette = document.getElementById('palette-box');
       container.innerHTML = '';
       palette.innerHTML = '';
 
-      examData.forEach(function(q, index) {
-        // Tạo nút số
-        const btnPal = document.createElement('button');
-        btnPal.id = 'palette-btn-' + index;
-        btnPal.type = 'button';
-        btnPal.className = 'w-full py-2 rounded-lg text-sm font-semibold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
-        btnPal.innerText = index + 1;
-        btnPal.onclick = function() {
-          const target = document.getElementById('question-card-' + index);
-          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        };
-        palette.appendChild(btnPal);
+      const letters = ['A', 'B', 'C', 'D'];
 
-        // Tạo thẻ câu hỏi
+      examData.forEach((q, idx) => {
+        // Nút palette
+        const btn = document.createElement('button');
+        btn.id = `palette-btn-${idx}`;
+        btn.type = 'button';
+        btn.className = 'w-full py-2 rounded-lg text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100 transition';
+        btn.innerText = idx + 1;
+        btn.onclick = () => document.getElementById(`q-card-${idx}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+        palette.appendChild(btn);
+
+        // Khung câu hỏi
         const card = document.createElement('div');
-        card.id = 'question-card-' + index;
-        card.className = 'bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200';
+        card.id = `q-card-${idx}`;
+        card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-slate-200';
 
-        const optLabels = ['A', 'B', 'C', 'D'];
-        let optionsHtml = '';
-        q.options.forEach(function(opt, oIdx) {
-          optionsHtml += `
-            <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition selection-label" data-q="${index}" data-opt="${oIdx}">
-              <input type="radio" name="q-${index}" value="${oIdx}" class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" onchange="selectOption(${index}, ${oIdx})">
-              <span class="font-bold text-slate-500 text-sm">${optLabels[oIdx]}.</span>
+        let optsHtml = '';
+        q.options.forEach((opt, oIdx) => {
+          optsHtml += `
+            <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition opt-lbl-${idx}" data-opt="${oIdx}">
+              <input type="radio" name="opt-${idx}" value="${oIdx}" class="w-4 h-4 text-indigo-600 focus:ring-0" onchange="chooseOption(${idx}, ${oIdx})">
+              <span class="font-bold text-slate-600 text-xs">${letters[oIdx]}.</span>
               <span class="text-sm font-medium text-slate-800">${opt}</span>
             </label>
           `;
         });
 
         card.innerHTML = `
-          <div class="flex items-start gap-3 mb-4">
-            <span class="bg-indigo-100 text-indigo-700 font-bold px-2.5 py-1 rounded-md text-xs whitespace-nowrap">Câu ${index + 1}</span>
-            <div class="text-slate-800 text-sm sm:text-base font-medium leading-relaxed">${q.question}</div>
+          <div class="flex items-start gap-2.5 mb-2">
+            <span class="bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded text-xs whitespace-nowrap">Câu ${idx + 1}</span>
+            <div class="text-sm sm:text-base font-medium text-slate-900 leading-relaxed">${q.question}</div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-            ${optionsHtml}
-          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">${optsHtml}</div>
         `;
         container.appendChild(card);
       });
@@ -299,143 +432,156 @@
       renderMath(container);
     }
 
-    // Chọn phương án
-    window.selectOption = function(qIdx, optIdx) {
+    function chooseOption(qIdx, optIdx) {
       userAnswers[qIdx] = optIdx;
+      const btn = document.getElementById(`palette-btn-${qIdx}`);
+      if (btn) btn.className = 'w-full py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow';
 
-      const palBtn = document.getElementById('palette-btn-' + qIdx);
-      if (palBtn) {
-        palBtn.className = 'w-full py-2 rounded-lg text-sm font-bold bg-indigo-600 text-white shadow-sm';
-      }
-
-      const labels = document.querySelectorAll('[data-q="' + qIdx + '"]');
-      labels.forEach(function(lbl) {
+      document.querySelectorAll(`.opt-lbl-${qIdx}`).forEach(lbl => {
         if (lbl.getAttribute('data-opt') == optIdx) {
-          lbl.classList.add('border-indigo-600', 'bg-indigo-50/50');
+          lbl.classList.add('border-indigo-600', 'bg-indigo-50/60');
         } else {
-          lbl.classList.remove('border-indigo-600', 'bg-indigo-50/50');
+          lbl.classList.remove('border-indigo-600', 'bg-indigo-50/60');
         }
       });
-    };
 
-    // Đếm giờ
-    function startTimer() {
+      document.getElementById('exam-progress-label').innerText = `Tiến độ: ${Object.keys(userAnswers).length}/${examData.length}`;
+    }
+
+    function startExamTimer() {
       const display = document.getElementById('timer-display');
-      timerInterval = setInterval(function() {
+      timerInterval = setInterval(() => {
         timeSpentSec++;
         let remain = timeTotalSec - timeSpentSec;
-
         if (remain <= 0) {
           clearInterval(timerInterval);
-          alert("Đã hết 15 phút! Hệ thống tiến hành thu bài.");
+          alert("Hết giờ làm bài! Hệ thống tự động thu bài.");
           submitExam();
           return;
         }
-
         let m = Math.floor(remain / 60);
         let s = remain % 60;
-        display.innerText = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        display.innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
       }, 1000);
     }
 
-    // Nộp bài
-    document.getElementById('btn-submit-exam').addEventListener('click', function() {
-      const answeredCount = Object.keys(userAnswers).length;
-      if (answeredCount < examData.length) {
-        if (!confirm('Bạn mới trả lời ' + answeredCount + '/' + examData.length + ' câu. Bạn có chắc muốn nộp bài?')) return;
+    function confirmSubmit() {
+      const answered = Object.keys(userAnswers).length;
+      if (answered < examData.length) {
+        if (!confirm(`Thí sinh mới làm ${answered}/${examData.length} câu. Bạn có chắc muốn nộp sớm?`)) return;
       } else {
-        if (!confirm('Bạn có chắc chắn muốn nộp bài thi?')) return;
+        if (!confirm("Xác nhận nộp bài thi?")) return;
       }
       submitExam();
-    });
+    }
 
+    // ========================================================
+    // 4. NỘP BÀI & GỬI DỮ LIỆU ĐẾN GOOGLE SHEETS QUA FORM ẨN (100% THÀNH CÔNG)
+    // ========================================================
     function submitExam() {
       clearInterval(timerInterval);
 
       let correctCount = 0;
-      examData.forEach(function(q, idx) {
+      examData.forEach((q, idx) => {
         if (userAnswers[idx] === q.answer) correctCount++;
       });
 
       const score = ((correctCount / examData.length) * 10).toFixed(1);
 
       document.getElementById('screen-exam').classList.add('hidden');
-      document.getElementById('header-right').classList.add('hidden');
+      document.getElementById('timer-box').classList.add('hidden');
       document.getElementById('screen-result').classList.remove('hidden');
 
-      document.getElementById('res-student-info').innerText = studentInfo.name + ' - Lớp ' + studentInfo.class;
-      document.getElementById('res-score').innerText = score + '/10';
-      document.getElementById('res-correct').innerText = correctCount + '/' + examData.length;
+      document.getElementById('res-user-info').innerText = `${studentInfo.name} - Lớp ${studentInfo.class}`;
+      document.getElementById('res-score').innerText = `${score}/10`;
+      document.getElementById('res-correct').innerText = `${correctCount}/${examData.length}`;
 
       let m = Math.floor(timeSpentSec / 60);
       let s = timeSpentSec % 60;
-      document.getElementById('res-time').innerText = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      document.getElementById('res-time').innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
 
       renderSolutions();
-      if (window.lucide) lucide.createIcons();
+      lucide.createIcons();
 
-      // GỬI KẾT QUẢ VỀ GOOGLE SHEETS
-      if (typeof GOOGLE_SCRIPT_URL !== 'undefined' && GOOGLE_SCRIPT_URL.startsWith('http')) {
-        const payload = {
-          name: studentInfo.name,
-          className: studentInfo.class,
-          id: studentInfo.id,
-          score: score,
-          correctCount: correctCount,
-          totalQuestions: examData.length,
-          timeSpentSec: timeSpentSec,
-          answers: userAnswers
-        };
-
-        fetch(GOOGLE_SCRIPT_URL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        }).then(function() {
-          console.log("Đã lưu điểm thành công vào Google Sheets!");
-        }).catch(function(err) {
-          console.error("Lỗi gửi dữ liệu:", err);
-        });
-      }
+      // Gửi điểm số về Google Sheets
+      sendScoreToGoogleSheet({
+        name: studentInfo.name,
+        className: studentInfo.class,
+        id: studentInfo.id,
+        score: score,
+        correctCount: correctCount,
+        totalQuestions: examData.length,
+        timeSpentSec: timeSpentSec,
+        answers: JSON.stringify(userAnswers)
+      });
     }
 
-    // Hiển thị lời giải
-    function renderSolutions() {
-      const solContainer = document.getElementById('solutions-container');
-      solContainer.innerHTML = '';
-      const optLabels = ['A', 'B', 'C', 'D'];
+    function sendScoreToGoogleSheet(data) {
+      if (!GOOGLE_SCRIPT_URL || !GOOGLE_SCRIPT_URL.startsWith('http')) return;
 
-      examData.forEach(function(q, idx) {
+      const iframeName = 'hidden_iframe_submit';
+      let iframe = document.getElementById(iframeName);
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = iframeName;
+        iframe.name = iframeName;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = GOOGLE_SCRIPT_URL;
+      form.target = iframeName;
+
+      for (const k in data) {
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = k;
+        inp.value = data[k];
+        form.appendChild(inp);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      setTimeout(() => document.body.removeChild(form), 1000);
+    }
+
+    function renderSolutions() {
+      const container = document.getElementById('solutions-box');
+      container.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      examData.forEach((q, idx) => {
         const userChoice = userAnswers[idx];
         const isCorrect = userChoice === q.answer;
 
-        const item = document.createElement('div');
-        item.className = 'pt-4 first:pt-0';
-        item.innerHTML = `
+        const row = document.createElement('div');
+        row.className = 'pt-4 first:pt-0';
+        row.innerHTML = `
           <div class="flex items-start gap-2 mb-2">
-            <span class="px-2 py-0.5 rounded text-xs font-bold ${isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-              Câu ${idx + 1}: ${isCorrect ? 'Đúng' : 'Sai'}
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+              Câu ${idx + 1}: ${isCorrect ? 'ĐÚNG' : 'SAI'}
             </span>
             <div class="text-sm font-medium text-slate-800">${q.question}</div>
           </div>
           <div class="text-xs space-y-1 mb-2 text-slate-600">
-            <p>• Thí sinh chọn: <strong class="${isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${userChoice !== undefined ? optLabels[userChoice] : 'Chưa chọn'}</strong></p>
-            <p>• Đáp án đúng: <strong class="text-emerald-700">${optLabels[q.answer]}</strong></p>
+            <p>• Thí sinh chọn: <strong class="${isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${userChoice !== undefined ? letters[userChoice] : 'Chưa chọn'}</strong></p>
+            <p>• Đáp án đúng: <strong class="text-emerald-700">${letters[q.answer]}</strong></p>
           </div>
           <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-700 leading-relaxed">
             <strong class="text-indigo-700">Lời giải chi tiết:</strong><br>${q.solution}
           </div>
         `;
-        solContainer.appendChild(item);
+        container.appendChild(row);
       });
 
-      renderMath(solContainer);
+      renderMath(container);
     }
 
-    // Khởi chạy icons ban đầu
     window.onload = function() {
-      if (window.lucide) lucide.createIcons();
+      loadDemoLatex();
+      lucide.createIcons();
     };
   </script>
 </body>
