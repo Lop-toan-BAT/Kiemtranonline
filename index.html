@@ -573,4 +573,59 @@ ${cleanTikz}
 
       const form = document.createElement('form');
       form.method = 'POST';
-      form.action = GO
+      form.action = GOOGLE_SCRIPT_URL;
+      form.target = iframeName;
+
+      for (const k in data) {
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = k;
+        inp.value = data[k];
+        form.appendChild(inp);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      setTimeout(() => document.body.removeChild(form), 1000);
+    }
+
+    function renderSolutions() {
+      const container = document.getElementById('solutions-box');
+      container.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      examData.forEach((q, idx) => {
+        const userChoice = userAnswers[idx];
+        const isCorrect = userChoice === q.answer;
+
+        const row = document.createElement('div');
+        row.className = 'pt-4 first:pt-0';
+        row.innerHTML = `
+          <div class="flex items-start gap-2 mb-2">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+              Câu ${idx + 1}: ${isCorrect ? 'ĐÚNG' : 'SAI'}
+            </span>
+            <div class="text-sm font-medium text-slate-800 w-full">${q.question}</div>
+          </div>
+          <div class="text-xs space-y-1 mb-2 text-slate-600">
+            <p>• Thí sinh chọn: <strong class="${isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${userChoice !== undefined ? letters[userChoice] : 'Chưa chọn'}</strong></p>
+            <p>• Đáp án đúng: <strong class="text-emerald-700">${letters[q.answer]}</strong></p>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-700 leading-relaxed">
+            <strong class="text-indigo-700">Lời giải chi tiết:</strong><br>${q.solution}
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      renderMath(container);
+    }
+
+    window.onload = async function() {
+      document.getElementById('latex-code').value = DEFAULT_LATEX_SOURCE;
+      await loadExamFromText(DEFAULT_LATEX_SOURCE);
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>
