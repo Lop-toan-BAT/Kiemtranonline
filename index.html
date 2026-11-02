@@ -257,23 +257,38 @@
     }
 
     async function convertTikzToSvg(rawTikz) {
-      try {
-        let cleanTikz = rawTikz.replace(/\\begin\{center\}/g, '').replace(/\\end\{center\}/g, '').trim();
-        const fullDoc = `\\documentclass[tikz,border=3pt]{standalone}\\usepackage{amsmath,amssymb}\\usepackage{tikz}\\usetikzlibrary{calc,arrows.meta}\\begin{document}${cleanTikz}\\end{document}`;
-        const res = await fetch("https://kroki.io/tikz/svg", {
-          method: "POST",
-          headers: { "Content-Type": "text/plain; charset=utf-8" },
-          body: fullDoc
-        });
-        if (res.ok) {
-          const svg = await res.text();
-          return `<div class="my-4 flex justify-center overflow-x-auto w-full"><div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">${svg}</div></div>`;
-        }
-        return ``;
-      } catch (e) {
-        return ``;
-      }
+  try {
+    let cleanTikz = rawTikz
+      .replace(/\\begin\{center\}/g, '')
+      .replace(/\\end\{center\}/g, '')
+      .trim();
+
+    // Nạp đầy đủ các gói hỗ trợ ký hiệu toán học như \colon, \left, \right
+    const fullDoc = `\\documentclass[tikz,border=4pt]{standalone}
+\\usepackage{amsmath,amssymb}
+\\usepackage{tikz}
+\\usepackage{pgfplots}
+\\pgfplotsset{compat=1.18}
+\\usetikzlibrary{calc,arrows.meta,intersections}
+\\begin{document}
+${cleanTikz}
+\\end{document}`;
+
+    const res = await fetch("https://kroki.io/tikz/svg", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+      body: fullDoc
+    });
+
+    if (res.ok) {
+      const svg = await res.text();
+      return `<div class="my-4 flex justify-center overflow-x-auto w-full"><div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">${svg}</div></div>`;
     }
+    return `<div class="my-3 p-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs text-center rounded">[Lỗi dịch hình TikZ: Hãy kiểm tra các gói thư viện]</div>`;
+  } catch (e) {
+    return `<div class="my-3 p-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center rounded">[Không kết nối được Kroki API]</div>`;
+  }
+}
 
     async function parseLatexExam(rawSource) {
       let cleaned = rawSource.replace(/(^|[^\\])%.*$/gm, '$1').replace(/\r\n/g, '\n');
