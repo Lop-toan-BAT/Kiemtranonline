@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiểm Tra Trực Tuyến - Lớp Toán BAT</title>
+  <title>Kiểm Tra Trực Tuyến - Đầy Đủ 3 Phần</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- KaTeX -->
@@ -21,8 +21,8 @@
       <div class="flex items-center gap-2">
         <i data-lucide="calculator" class="w-7 h-7"></i>
         <div>
-          <h1 class="text-base sm:text-lg font-bold leading-tight">TOÁN THPT - KIỂM TRA TRỰC TUYẾN</h1>
-          <p class="text-xs text-indigo-200">Hệ thống biên dịch LaTeX &amp; Hình vẽ Không gian</p>
+          <h1 class="text-base sm:text-lg font-bold leading-tight">TOÁN THPT - ĐỀ THI ĐỊNH DẠNG MỚI</h1>
+          <p class="text-xs text-indigo-200">Trắc nghiệm • Đúng/Sai • Trả lời ngắn • TikZ SVG</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -32,7 +32,7 @@
         </button>
         <div id="timer-box" class="hidden items-center gap-1.5 bg-indigo-900 px-3 py-1.5 rounded-full text-sm font-semibold">
           <i data-lucide="clock" class="w-4 h-4 text-amber-300"></i>
-          <span id="timer-display" class="font-mono text-amber-200">20:00</span>
+          <span id="timer-display" class="font-mono text-amber-200">45:00</span>
         </div>
       </div>
     </div>
@@ -40,25 +40,25 @@
 
   <main class="max-w-5xl mx-auto p-4 flex-1 w-full">
 
-    <!-- KHU VỰC NẠP ĐỀ LATEX -->
-    <section id="panel-admin" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
+    <!-- KHU VỰC NẠP ĐỀ -->
+    <section id="panel-admin" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6">
       <div class="flex items-center justify-between mb-3 border-b pb-3">
         <div>
           <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <i data-lucide="code-2" class="w-5 h-5 text-indigo-600"></i>
-            Dán mã nguồn đề thi LaTeX (Gói ex-test, hỗ trợ TikZ không gian)
+            Dán mã nguồn đề thi LaTeX (Hỗ trợ \choice, \choiceTF, \shortans)
           </h2>
-          <p class="text-xs text-slate-500 mt-0.5">Tự động nhận diện thư viện calc, arrows.meta và dựng hình SVG</p>
+          <p class="text-xs text-slate-500 mt-0.5">Tự động phân loại 3 phần theo chuẩn cấu trúc đề của Bộ</p>
         </div>
-        <button type="button" onclick="loadExamFromText(DEFAULT_LATEX_SOURCE)" class="text-xs text-indigo-600 hover:underline font-semibold">Khôi phục đề mẫu</button>
+        <button type="button" onclick="loadExamFromText(SAMPLE_EXAM_SOURCE)" class="text-xs text-indigo-600 hover:underline font-semibold">Nạp đề mẫu đủ 3 dạng</button>
       </div>
 
-      <textarea id="latex-code" rows="9" class="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed" placeholder="Dán nội dung file .tex vào đây..."></textarea>
+      <textarea id="latex-code" rows="9" class="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed" placeholder="Dán nội dung mã TeX vào đây..."></textarea>
 
       <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2 text-xs">
           <label class="font-semibold text-slate-700">Thời gian làm bài:</label>
-          <input type="number" id="cfg-time" value="20" class="w-16 px-2 py-1 border rounded text-center font-bold"> 
+          <input type="number" id="cfg-time" value="45" class="w-16 px-2 py-1 border rounded text-center font-bold"> 
           <span>phút</span>
         </div>
         <button id="btn-build" type="button" onclick="handleBuildFromInput()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-2 transition">
@@ -68,7 +68,7 @@
       </div>
       <div id="parse-loading" class="hidden mt-3 text-xs text-indigo-600 font-semibold items-center gap-2">
         <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <span>Đang kết nối dịch vụ đồ họa dựng hình TikZ sang SVG...</span>
+        <span>Đang bóc tách đề và dựng hình TikZ...</span>
       </div>
     </section>
 
@@ -78,19 +78,19 @@
         <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-2">
           <i data-lucide="user-pen" class="w-6 h-6"></i>
         </div>
-        <h2 class="text-lg font-bold text-slate-900">BÀI KIỂM TRA TOÁN HỌC</h2>
-        <p class="text-xs text-slate-500 mt-1">Đề gồm <strong id="lbl-q-count" class="text-indigo-600 text-sm">0</strong> câu hỏi trắc nghiệm</p>
+        <h2 class="text-lg font-bold text-slate-900">BÀI THI KIỂM TRA TOÁN HỌC</h2>
+        <p class="text-xs text-slate-500 mt-1">Đề gồm <strong id="lbl-q-count" class="text-indigo-600 font-bold">0</strong> câu hỏi</p>
       </div>
 
       <form id="form-start" class="space-y-3">
         <div>
           <label class="block text-xs font-medium text-slate-700 mb-1">Họ và tên thí sinh</label>
-          <input type="text" id="stu-name" required placeholder="Ví dụ: Bùi Anh Tuấn" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+          <input type="text" id="stu-name" required placeholder="Ví dụ: Bùi Thảo Như" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">Lớp</label>
-            <input type="text" id="stu-class" required placeholder="Ví dụ: 12" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <input type="text" id="stu-class" required placeholder="Ví dụ: 10A1" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-700 mb-1">Số báo danh</label>
@@ -110,7 +110,7 @@
       <aside class="md:col-span-1 order-2 md:order-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-200 h-fit sticky top-20">
         <h3 class="font-bold text-xs text-slate-700 mb-3 flex items-center gap-1.5 uppercase">
           <i data-lucide="layout-grid" class="w-4 h-4 text-indigo-600"></i>
-          Danh Sách Câu Hỏi
+          Bảng Câu Hỏi
         </h3>
         <div id="palette-box" class="grid grid-cols-4 gap-2 mb-4 max-h-[60vh] overflow-y-auto pr-1"></div>
         <button type="button" onclick="confirmSubmit()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition text-xs flex items-center justify-center gap-1.5">
@@ -121,10 +121,10 @@
 
       <div class="md:col-span-3 order-1 md:order-2 space-y-5">
         <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-xl flex items-center justify-between text-xs">
-          <span class="text-slate-700">Học sinh: <strong id="exam-user-label" class="text-indigo-900 font-bold"></strong></span>
-          <span id="exam-progress-label" class="text-slate-500 font-medium">Tiến độ: 0/0</span>
+          <span class="text-slate-700">Thí sinh: <strong id="exam-user-label" class="text-indigo-900 font-bold"></strong></span>
+          <span id="exam-progress-label" class="text-slate-500 font-medium">Đã làm: 0/0</span>
         </div>
-        <div id="questions-box" class="space-y-5"></div>
+        <div id="questions-box" class="space-y-6"></div>
       </div>
     </section>
 
@@ -137,24 +137,16 @@
         <h2 class="text-xl font-bold text-slate-900">KẾT QUẢ BÀI THI</h2>
         <p class="text-xs text-slate-500 mt-1" id="res-user-info"></p>
 
-        <div class="mt-4 grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+        <div class="mt-4 grid grid-cols-2 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
           <div>
-            <p class="text-xs text-slate-500">Điểm số</p>
-            <p id="res-score" class="text-2xl font-black text-indigo-600 mt-1">0/10</p>
-          </div>
-          <div>
-            <p class="text-xs text-slate-500">Số câu đúng</p>
-            <p id="res-correct" class="text-2xl font-black text-emerald-600 mt-1">0/0</p>
+            <p class="text-xs text-slate-500">Điểm tổng (thang 10)</p>
+            <p id="res-score" class="text-3xl font-black text-indigo-600 mt-1">0.0</p>
           </div>
           <div>
             <p class="text-xs text-slate-500">Thời gian làm</p>
-            <p id="res-time" class="text-2xl font-black text-slate-700 mt-1">00:00</p>
+            <p id="res-time" class="text-3xl font-black text-slate-700 mt-1">00:00</p>
           </div>
         </div>
-        <p class="text-xs text-emerald-600 mt-3 font-semibold flex items-center justify-center gap-1">
-          <i data-lucide="cloud-check" class="w-4 h-4"></i>
-          Đã lưu điểm vào Google Sheets thành công!
-        </p>
       </div>
 
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -162,12 +154,12 @@
           <i data-lucide="book-open" class="w-4 h-4 text-indigo-600"></i>
           Đáp Án &amp; Lời Giải Chi Tiết
         </h3>
-        <div id="solutions-box" class="space-y-5 divide-y divide-slate-100"></div>
+        <div id="solutions-box" class="space-y-6 divide-y divide-slate-100"></div>
       </div>
 
       <div class="text-center pb-6">
         <button onclick="location.reload()" class="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-xl">
-          Làm lại bài thi
+          Làm lại bài khác
         </button>
       </div>
     </section>
@@ -175,60 +167,54 @@
   </main>
 
   <script>
-    // Link Web App Apps Script nhận điểm của thầy
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaBPufJqo0nJv_Oa7u5BjPwx7G5W2oQ5joyjsm8qu9CZwaT7vzZmUt4Id2yqnrAw0/exec";
+    // Link Web App nhận điểm Google Sheets của thầy (ĐIỀN LINK CỦA THẦY VÀO ĐÂY)
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxodKVgJhYRv9SxN5nnHsXTEI9freN-yMmhaxAN11cWTucZHgOAvjFU0lfEobppQzY/exec";
 
-    // Câu hỏi hình chóp S.ABCD của thầy làm đề mặc định
-    const DEFAULT_LATEX_SOURCE = `\\begin{ex}
-	Cho hình chóp $S.ABCD$ có đáy $ABCD$ là hình bình hành (hình vẽ).
-	\\begin{center}
-		\\begin{tikzpicture}[>=stealth,scale=0.9]
-		\\coordinate (A) at (0,0);
-		\\coordinate (B) at (3.5,0);
-		\\coordinate (D) at (-1.5,-1.2);
-		\\coordinate (C) at ($(B)+(D)-(A)$);
-		\\coordinate (S) at (0.8,2.8);
-		\\draw[thick] (S)--(D)--(C)--(B)--(S)--(C);
-		\\draw[dashed,thick] (D)--(A)--(B) (S)--(A);
-		\\foreach \\p/\\pos in {A/left,B/right,C/below right,D/below left,S/above}
-		\\node[\\pos] at (\\p) {$\\p$};
-		\\end{tikzpicture}
-	\\end{center}
-	Hai đường thẳng $SA$ và $CD$ có vị trí tương đối là
+    // ĐỀ MẪU TỔNG HỢP ĐỦ CẢ 3 DẠNG CÂU HỎI
+    const SAMPLE_EXAM_SOURCE = `% PHẦN 1: TRẮC NGHIỆM NHIỀU LỰA CHỌN
+\\begin{ex}
+	Cho hàm số $y = f(x)$ xác định trên $\\mathbb{R}$ và có bảng biến thiên như hình vẽ. Hàm số đồng biến trên khoảng nào?
 	\\choice
-{Cắt nhau.}
-{Song song.}
-{\\True Chéo nhau.}
-{Trùng nhau.}
-\\loigiai{
-		Đường thẳng $CD$ nằm trong mặt phẳng $(ABCD)$, đường thẳng $SA$ cắt mặt phẳng $(ABCD)$ tại điểm $A \\notin CD$. Do đó $SA$ và $CD$ là hai đường thẳng chéo nhau.
+	{\\True $(-\\infty; 0)$}
+	{$(0; 2)$}
+	{$(0; +\\infty)$}
+	{$(-1; 1)$}
+	\\loigiai{Dựa vào bảng biến thiên, hàm số đồng biến trên khoảng $(-\\infty; 0)$.}
+\\end{ex}
+
+% PHẦN 2: TRẮC NGHIỆM ĐÚNG SAI
+\\begin{ex}
+	Cho tam giác $ABC$ có $a = 6, b = 8, c = 10$. Xét tính đúng sai của các mệnh đề sau:
+	\\choiceTF
+	{\\True Tam giác $ABC$ là tam giác vuông tại $A$}
+	{Diện tích tam giác $ABC$ bằng $48$}
+	{\\True Bán kính đường tròn ngoại tiếp tam giác $R = 5$}
+	{\\True Bán kính đường tròn nội tiếp tam giác $r = 2$}
+	\\loigiai{
+		Ta có $a^2 + b^2 = 6^2 + 8^2 = 100 = c^2$, nên tam giác vuông tại $A$ $\\Rightarrow$ Đúng.\\
+		Diện tích $S = \\dfrac{1}{2}ab = 24$ $\\Rightarrow$ Sai.\\
+		$R = \\dfrac{c}{2} = 5$ $\\Rightarrow$ Đúng; $r = \\dfrac{S}{p} = \\dfrac{24}{12} = 2$ $\\Rightarrow$ Đúng.
 	}
 \\end{ex}
 
+% PHẦN 3: CÂU TRẢ LỜI NGẮN
 \\begin{ex}
-	Góc có số đo $120^\\circ$ đổi sang đơn vị radian bằng
-	\\choice
-{$\\dfrac{3\\pi}{4}$}
-{\\True $\\dfrac{2\\pi}{3}$}
-{$\\dfrac{5\\pi}{6}$}
-{$\\dfrac{\\pi}{3}$}
-\\loigiai{
-		Ta có $120^\\circ = 120 \\cdot \\dfrac{\\pi}{180} = \\dfrac{2\\pi}{3}\\text{ rad}$.
-	}
+	Tìm giá trị lớn nhất của hàm số $y = -x^2 + 4x + 1$ trên $\\mathbb{R}$.
+	\\shortans{5}
+	\\loigiai{Ta có $y = -(x - 2)^2 + 5 \\le 5$. Giá trị lớn nhất bằng $5$ khi $x = 2$.}
 \\end{ex}`;
 
     let examData = [];
     let studentInfo = { name: '', class: '', id: '' };
     let userAnswers = {};
     let timerInterval = null;
-    let timeTotalSec = 20 * 60;
+    let timeTotalSec = 45 * 60;
     let timeSpentSec = 0;
 
     function toggleAdmin() {
       document.getElementById('panel-admin').classList.toggle('hidden');
     }
 
-    // Thuật toán đếm cặp ngoặc nhọn
     function extractBracedBlocks(text, startIndex = 0) {
       let blocks = [];
       let depth = 0;
@@ -270,42 +256,27 @@
         .trim();
     }
 
-    // Hàm gọi Kroki API chuyển mã TikZ sang ảnh SVG
     async function convertTikzToSvg(rawTikz) {
       try {
-        let cleanTikz = rawTikz
-          .replace(/\\begin\{center\}/g, '')
-          .replace(/\\end\{center\}/g, '')
-          .trim();
-
-        // Nạp đầy đủ thư viện calc, arrows.meta, amsmath
-        const fullLatexDoc = `\\documentclass[tikz,border=3pt]{standalone}
-\\usepackage{amsmath,amssymb}
-\\usepackage{tikz}
-\\usetikzlibrary{calc,arrows.meta}
-\\begin{document}
-${cleanTikz}
-\\end{document}`;
-
+        let cleanTikz = rawTikz.replace(/\\begin\{center\}/g, '').replace(/\\end\{center\}/g, '').trim();
+        const fullDoc = `\\documentclass[tikz,border=3pt]{standalone}\\usepackage{amsmath,amssymb}\\usepackage{tikz}\\usetikzlibrary{calc,arrows.meta}\\begin{document}${cleanTikz}\\end{document}`;
         const res = await fetch("https://kroki.io/tikz/svg", {
           method: "POST",
           headers: { "Content-Type": "text/plain; charset=utf-8" },
-          body: fullLatexDoc
+          body: fullDoc
         });
-
         if (res.ok) {
-          const svgContent = await res.text();
-          return `<div class="my-4 flex justify-center overflow-x-auto w-full"><div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">${svgContent}</div></div>`;
+          const svg = await res.text();
+          return `<div class="my-4 flex justify-center overflow-x-auto w-full"><div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm">${svg}</div></div>`;
         }
-        return `<div class="my-3 p-2 bg-amber-50 border border-amber-200 text-amber-700 text-xs text-center rounded">[Lỗi biên dịch hình vẽ TikZ]</div>`;
+        return ``;
       } catch (e) {
-        return `<div class="my-3 p-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center rounded">[Không kết nối được dịch vụ đồ họa]</div>`;
+        return ``;
       }
     }
 
     async function parseLatexExam(rawSource) {
       let cleaned = rawSource.replace(/(^|[^\\])%.*$/gm, '$1').replace(/\r\n/g, '\n');
-      
       const parsed = [];
       const exRegex = /\\begin\{(ex|bt)\}([\s\S]*?)\\end\{\1\}/g;
       let match;
@@ -314,6 +285,7 @@ ${cleanTikz}
         let block = match[2].trim();
         let solution = "Không có lời giải chi tiết.";
 
+        // Bóc tách \loigiai
         const lgIdx = block.indexOf('\\loigiai');
         if (lgIdx !== -1) {
           const lgBlocks = extractBracedBlocks(block, lgIdx);
@@ -323,47 +295,78 @@ ${cleanTikz}
           }
         }
 
-        const choiceIdx = block.indexOf('\\choice');
+        // Kiểm tra loại câu hỏi
+        let type = 'MC'; // MC: Nhiều lựa chọn, TF: Đúng/Sai, SA: Trả lời ngắn
         let questionText = block;
         let options = [];
-        let correctIdx = 0;
+        let correctAnswer = null;
 
-        if (choiceIdx !== -1) {
-          questionText = block.substring(0, choiceIdx).trim();
-          const choicesBlock = block.substring(choiceIdx + 7);
-          const optBlocks = extractBracedBlocks(choicesBlock);
+        // 1. Dạng Trả lời ngắn \shortans{...}
+        const saIdx = block.indexOf('\\shortans');
+        if (saIdx !== -1) {
+          type = 'SA';
+          questionText = block.substring(0, saIdx).trim();
+          const saBlocks = extractBracedBlocks(block, saIdx);
+          if (saBlocks.length > 0) {
+            correctAnswer = saBlocks[0].content.trim().replace(',', '.');
+          }
+        } 
+        // 2. Dạng Đúng / Sai \choiceTF
+        else if (block.includes('\\choiceTF')) {
+          type = 'TF';
+          const tfIdx = block.indexOf('\\choiceTF');
+          questionText = block.substring(0, tfIdx).trim();
+          const choicesPart = block.substring(tfIdx + 9);
+          const optBlocks = extractBracedBlocks(choicesPart);
 
+          correctAnswer = [];
           for (let i = 0; i < Math.min(optBlocks.length, 4); i++) {
-            let optStr = optBlocks[i].content.trim();
-            if (optStr.startsWith('\\True') || optStr.includes('\\True')) {
-              correctIdx = i;
-              optStr = optStr.replace(/\\True\s*/g, '').trim();
+            let item = optBlocks[i].content.trim();
+            let isTrue = item.startsWith('\\True') || item.includes('\\True');
+            item = item.replace(/\\True\s*/g, '').trim();
+            options.push(cleanLatexText(item));
+            correctAnswer.push(isTrue);
+          }
+        } 
+        // 3. Dạng Nhiều lựa chọn thông thường \choice
+        else if (block.includes('\\choice')) {
+          type = 'MC';
+          const cIdx = block.indexOf('\\choice');
+          questionText = block.substring(0, cIdx).trim();
+          const choicesPart = block.substring(cIdx + 7);
+          const optBlocks = extractBracedBlocks(choicesPart);
+
+          correctAnswer = 0;
+          for (let i = 0; i < Math.min(optBlocks.length, 4); i++) {
+            let item = optBlocks[i].content.trim();
+            if (item.startsWith('\\True') || item.includes('\\True')) {
+              correctAnswer = i;
+              item = item.replace(/\\True\s*/g, '').trim();
             }
-            options.push(cleanLatexText(optStr));
+            options.push(cleanLatexText(item));
           }
         }
 
-        // Bóc tách và chuyển đổi hình vẽ TikZ (hỗ trợ cả khi nằm trong center)
+        // Xử lý hình TikZ
         const tikzRegex = /(\\begin\{center\}\s*)?\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}(\s*\\end\{center\})?/g;
         const tikzMatches = questionText.match(tikzRegex);
         if (tikzMatches) {
           for (let tikzCode of tikzMatches) {
             const svgHtml = await convertTikzToSvg(tikzCode);
-            questionText = questionText.replace(tikzCode, svgHtml);
+            if (svgHtml) questionText = questionText.replace(tikzCode, svgHtml);
           }
         }
 
         questionText = cleanLatexText(questionText);
 
-        if (options.length === 4) {
-          parsed.push({
-            id: parsed.length + 1,
-            question: questionText,
-            options: options,
-            answer: correctIdx,
-            solution: solution
-          });
-        }
+        parsed.push({
+          id: parsed.length + 1,
+          type: type,
+          question: questionText,
+          options: options,
+          answer: correctAnswer,
+          solution: solution
+        });
       }
 
       return parsed;
@@ -371,34 +374,29 @@ ${cleanTikz}
 
     async function handleBuildFromInput() {
       const raw = document.getElementById('latex-code').value.trim();
-      if (!raw) {
-        alert("Vui lòng dán mã LaTeX đề thi vào khung!");
-        return;
-      }
+      if (!raw) return alert("Vui lòng dán đề vào khung trước!");
       await loadExamFromText(raw);
     }
 
-    async function loadExamFromText(texSource) {
+    async function loadExamFromText(source) {
       const loader = document.getElementById('parse-loading');
       loader.classList.remove('hidden');
       loader.classList.add('flex');
 
-      const result = await parseLatexExam(texSource);
+      examData = await parseLatexExam(source);
 
       loader.classList.add('hidden');
       loader.classList.remove('flex');
 
-      if (result.length === 0) {
-        alert("Không nhận diện được câu hỏi nào! Thầy kiểm tra lại cú pháp gói ex-test.");
+      if (examData.length === 0) {
+        alert("Không nhận diện được câu hỏi nào! Thầy hãy kiểm tra lại file TeX.");
         return;
       }
 
-      examData = result;
-      timeTotalSec = (parseInt(document.getElementById('cfg-time').value) || 20) * 60;
+      timeTotalSec = (parseInt(document.getElementById('cfg-time').value) || 45) * 60;
       document.getElementById('lbl-q-count').innerText = examData.length;
       document.getElementById('panel-admin').classList.add('hidden');
-
-      alert(`Đã nhận diện thành công ${examData.length} câu hỏi (đã dựng hình TikZ hoàn tất)!`);
+      alert(`Đã nhận diện thành công ${examData.length} câu hỏi thuộc 3 phần!`);
     }
 
     function renderMath(dom) {
@@ -438,9 +436,8 @@ ${cleanTikz}
       container.innerHTML = '';
       palette.innerHTML = '';
 
-      const letters = ['A', 'B', 'C', 'D'];
-
       examData.forEach((q, idx) => {
+        // Nút palette bên trái
         const btn = document.createElement('button');
         btn.id = `palette-btn-${idx}`;
         btn.type = 'button';
@@ -453,23 +450,65 @@ ${cleanTikz}
         card.id = `q-card-${idx}`;
         card.className = 'bg-white p-5 rounded-2xl shadow-sm border border-slate-200';
 
-        let optsHtml = '';
-        q.options.forEach((opt, oIdx) => {
-          optsHtml += `
-            <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition opt-lbl-${idx}" data-opt="${oIdx}">
-              <input type="radio" name="opt-${idx}" value="${oIdx}" class="w-4 h-4 text-indigo-600 focus:ring-0" onchange="chooseOption(${idx}, ${oIdx})">
-              <span class="font-bold text-slate-600 text-xs">${letters[oIdx]}.</span>
-              <span class="text-sm font-medium text-slate-800">${opt}</span>
-            </label>
+        let bodyHtml = '';
+
+        // 1. Dạng MC (Trắc nghiệm 4 lựa chọn)
+        if (q.type === 'MC') {
+          const letters = ['A', 'B', 'C', 'D'];
+          let opts = '';
+          q.options.forEach((opt, oIdx) => {
+            opts += `
+              <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition opt-lbl-${idx}" data-opt="${oIdx}">
+                <input type="radio" name="opt-${idx}" value="${oIdx}" class="w-4 h-4 text-indigo-600 focus:ring-0" onchange="chooseMC(${idx}, ${oIdx})">
+                <span class="font-bold text-slate-600 text-xs">${letters[oIdx]}.</span>
+                <span class="text-sm font-medium text-slate-800">${opt}</span>
+              </label>
+            `;
+          });
+          bodyHtml = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">${opts}</div>`;
+        }
+        // 2. Dạng TF (Đúng / Sai)
+        else if (q.type === 'TF') {
+          const subLetters = ['a', 'b', 'c', 'd'];
+          let rows = '';
+          q.options.forEach((opt, oIdx) => {
+            rows += `
+              <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 gap-3">
+                <div class="text-sm font-medium text-slate-800">
+                  <strong class="text-indigo-600 mr-1">${subLetters[oIdx]})</strong> ${opt}
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <label class="flex items-center gap-1 cursor-pointer text-xs font-semibold">
+                    <input type="radio" name="tf-${idx}-${oIdx}" value="true" class="text-emerald-600 focus:ring-0" onchange="chooseTF(${idx}, ${oIdx}, true)"> Đúng
+                  </label>
+                  <label class="flex items-center gap-1 cursor-pointer text-xs font-semibold">
+                    <input type="radio" name="tf-${idx}-${oIdx}" value="false" class="text-rose-600 focus:ring-0" onchange="chooseTF(${idx}, ${oIdx}, false)"> Sai
+                  </label>
+                </div>
+              </div>
+            `;
+          });
+          bodyHtml = `<div class="space-y-2 mt-3">${rows}</div>`;
+        }
+        // 3. Dạng SA (Trả lời ngắn)
+        else if (q.type === 'SA') {
+          bodyHtml = `
+            <div class="mt-4 flex items-center gap-3">
+              <span class="text-xs font-semibold text-slate-600">Đáp án của bạn:</span>
+              <input type="text" id="sa-input-${idx}" oninput="chooseSA(${idx}, this.value)" placeholder="Nhập số..." class="w-40 px-3 py-1.5 border-2 border-indigo-200 focus:border-indigo-600 rounded-lg text-sm font-bold text-indigo-900 outline-none">
+            </div>
           `;
-        });
+        }
+
+        const typeLabels = { MC: 'Nhiều lựa chọn', TF: 'Đúng / Sai', SA: 'Trả lời ngắn' };
 
         card.innerHTML = `
           <div class="flex items-start gap-2.5 mb-2">
             <span class="bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded text-xs whitespace-nowrap">Câu ${idx + 1}</span>
+            <span class="bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded text-[11px] whitespace-nowrap">${typeLabels[q.type]}</span>
             <div class="text-sm sm:text-base font-medium text-slate-900 leading-relaxed w-full">${q.question}</div>
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">${optsHtml}</div>
+          ${bodyHtml}
         `;
         container.appendChild(card);
       });
@@ -477,20 +516,36 @@ ${cleanTikz}
       renderMath(container);
     }
 
-    function chooseOption(qIdx, optIdx) {
+    function chooseMC(qIdx, optIdx) {
       userAnswers[qIdx] = optIdx;
+      markPaletteDone(qIdx);
+    }
+
+    function chooseTF(qIdx, subIdx, val) {
+      if (!userAnswers[qIdx] || typeof userAnswers[qIdx] !== 'object') {
+        userAnswers[qIdx] = {};
+      }
+      userAnswers[qIdx][subIdx] = val;
+      if (Object.keys(userAnswers[qIdx]).length === 4) {
+        markPaletteDone(qIdx);
+      }
+    }
+
+    function chooseSA(qIdx, val) {
+      const trimmed = val.trim();
+      if (trimmed) {
+        userAnswers[qIdx] = trimmed;
+        markPaletteDone(qIdx);
+      } else {
+        delete userAnswers[qIdx];
+        document.getElementById(`palette-btn-${qIdx}`).className = 'w-full py-2 rounded-lg text-xs font-bold border border-slate-200 bg-slate-50 text-slate-700';
+      }
+    }
+
+    function markPaletteDone(qIdx) {
       const btn = document.getElementById(`palette-btn-${qIdx}`);
       if (btn) btn.className = 'w-full py-2 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow';
-
-      document.querySelectorAll(`.opt-lbl-${qIdx}`).forEach(lbl => {
-        if (lbl.getAttribute('data-opt') == optIdx) {
-          lbl.classList.add('border-indigo-600', 'bg-indigo-50/60');
-        } else {
-          lbl.classList.remove('border-indigo-600', 'bg-indigo-50/60');
-        }
-      });
-
-      document.getElementById('exam-progress-label').innerText = `Tiến độ: ${Object.keys(userAnswers).length}/${examData.length}`;
+      document.getElementById('exam-progress-label').innerText = `Đã làm: ${Object.keys(userAnswers).length}/${examData.length}`;
     }
 
     function startExamTimer() {
@@ -500,7 +555,7 @@ ${cleanTikz}
         let remain = timeTotalSec - timeSpentSec;
         if (remain <= 0) {
           clearInterval(timerInterval);
-          alert("Hết giờ làm bài! Hệ thống tự động nộp bài.");
+          alert("Hết thời gian làm bài! Hệ thống tự động nộp bài.");
           submitExam();
           return;
         }
@@ -511,32 +566,47 @@ ${cleanTikz}
     }
 
     function confirmSubmit() {
-      const answered = Object.keys(userAnswers).length;
-      if (answered < examData.length) {
-        if (!confirm(`Thí sinh mới làm ${answered}/${examData.length} câu. Bạn có chắc muốn nộp sớm?`)) return;
-      } else {
-        if (!confirm("Xác nhận nộp bài thi?")) return;
-      }
+      if (!confirm("Bạn có chắc chắn muốn nộp bài thi?")) return;
       submitExam();
     }
 
     function submitExam() {
       clearInterval(timerInterval);
 
-      let correctCount = 0;
+      let totalScore = 0;
+
+      // Tính điểm theo đúng chuẩn phân phối từng dạng
       examData.forEach((q, idx) => {
-        if (userAnswers[idx] === q.answer) correctCount++;
+        const uAns = userAnswers[idx];
+
+        if (q.type === 'MC') {
+          if (uAns === q.answer) totalScore += 0.25;
+        } else if (q.type === 'TF') {
+          if (uAns && typeof uAns === 'object') {
+            let correctSubs = 0;
+            for (let i = 0; i < 4; i++) {
+              if (uAns[i] === q.answer[i]) correctSubs++;
+            }
+            if (correctSubs === 1) totalScore += 0.1;
+            else if (correctSubs === 2) totalScore += 0.25;
+            else if (correctSubs === 3) totalScore += 0.5;
+            else if (correctSubs === 4) totalScore += 1.0;
+          }
+        } else if (q.type === 'SA') {
+          if (uAns && String(uAns).replace(',', '.') === String(q.answer).replace(',', '.')) {
+            totalScore += 0.5;
+          }
+        }
       });
 
-      const score = ((correctCount / examData.length) * 10).toFixed(1);
+      const finalScore = totalScore.toFixed(2);
 
       document.getElementById('screen-exam').classList.add('hidden');
       document.getElementById('timer-box').classList.add('hidden');
       document.getElementById('screen-result').classList.remove('hidden');
 
       document.getElementById('res-user-info').innerText = `${studentInfo.name} - Lớp ${studentInfo.class}`;
-      document.getElementById('res-score').innerText = `${score}/10`;
-      document.getElementById('res-correct').innerText = `${correctCount}/${examData.length}`;
+      document.getElementById('res-score').innerText = finalScore;
 
       let m = Math.floor(timeSpentSec / 60);
       let s = timeSpentSec % 60;
@@ -545,13 +615,13 @@ ${cleanTikz}
       renderSolutions();
       lucide.createIcons();
 
-      // Gửi điểm số về Google Sheets
+      // Đồng bộ về Google Sheet
       sendScoreToGoogleSheet({
         name: studentInfo.name,
         className: studentInfo.class,
         id: studentInfo.id,
-        score: score,
-        correctCount: correctCount,
+        score: finalScore,
+        correctCount: 'Đa phần',
         totalQuestions: examData.length,
         timeSpentSec: timeSpentSec,
         answers: JSON.stringify(userAnswers)
@@ -560,7 +630,6 @@ ${cleanTikz}
 
     function sendScoreToGoogleSheet(data) {
       if (!GOOGLE_SCRIPT_URL || !GOOGLE_SCRIPT_URL.startsWith('http')) return;
-
       const iframeName = 'hidden_iframe_submit';
       let iframe = document.getElementById(iframeName);
       if (!iframe) {
@@ -593,26 +662,45 @@ ${cleanTikz}
       const container = document.getElementById('solutions-box');
       container.innerHTML = '';
       const letters = ['A', 'B', 'C', 'D'];
+      const subLetters = ['a', 'b', 'c', 'd'];
 
       examData.forEach((q, idx) => {
-        const userChoice = userAnswers[idx];
-        const isCorrect = userChoice === q.answer;
+        const uAns = userAnswers[idx];
+        let detailHtml = '';
+
+        if (q.type === 'MC') {
+          const isCorrect = uAns === q.answer;
+          detailHtml = `
+            <p>• Bạn chọn: <strong class="${isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${uAns !== undefined ? letters[uAns] : 'Chưa chọn'}</strong></p>
+            <p>• Đáp án đúng: <strong class="text-emerald-700">${letters[q.answer]}</strong></p>
+          `;
+        } else if (q.type === 'TF') {
+          let list = '';
+          for (let i = 0; i < 4; i++) {
+            const userVal = uAns ? uAns[i] : undefined;
+            const trueVal = q.answer[i];
+            const ok = userVal === trueVal;
+            list += `<div>Ý ${subLetters[i]}: Bạn chọn <strong>${userVal === true ? 'Đúng' : userVal === false ? 'Sai' : 'Chưa chọn'}</strong> | Đáp án: <strong class="${ok ? 'text-emerald-600' : 'text-rose-600'}">${trueVal ? 'Đúng' : 'Sai'}</strong></div>`;
+          }
+          detailHtml = `<div class="space-y-1 text-xs">${list}</div>`;
+        } else if (q.type === 'SA') {
+          const isCorrect = uAns && String(uAns).replace(',', '.') === String(q.answer).replace(',', '.');
+          detailHtml = `
+            <p>• Bạn trả lời: <strong class="${isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${uAns || 'Chưa trả lời'}</strong></p>
+            <p>• Đáp số đúng: <strong class="text-emerald-700 font-bold">${q.answer}</strong></p>
+          `;
+        }
 
         const row = document.createElement('div');
         row.className = 'pt-4 first:pt-0';
         row.innerHTML = `
           <div class="flex items-start gap-2 mb-2">
-            <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-              Câu ${idx + 1}: ${isCorrect ? 'ĐÚNG' : 'SAI'}
-            </span>
+            <span class="bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded text-xs">Câu ${idx + 1}</span>
             <div class="text-sm font-medium text-slate-800 w-full">${q.question}</div>
           </div>
-          <div class="text-xs space-y-1 mb-2 text-slate-600">
-            <p>• Thí sinh chọn: <strong class="${isCorrect ? 'text-emerald-600' : 'text-rose-600'}">${userChoice !== undefined ? letters[userChoice] : 'Chưa chọn'}</strong></p>
-            <p>• Đáp án đúng: <strong class="text-emerald-700">${letters[q.answer]}</strong></p>
-          </div>
-          <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 text-xs text-slate-700 leading-relaxed">
-            <strong class="text-indigo-700">Lời giải chi tiết:</strong><br>${q.solution}
+          <div class="text-xs space-y-1 mb-2 text-slate-600 bg-slate-50 p-2.5 rounded-lg border border-slate-100">${detailHtml}</div>
+          <div class="bg-indigo-50/50 p-3 rounded-lg border border-indigo-100 text-xs text-slate-700 leading-relaxed">
+            <strong class="text-indigo-800">Lời giải chi tiết:</strong><br>${q.solution}
           </div>
         `;
         container.appendChild(row);
@@ -622,8 +710,8 @@ ${cleanTikz}
     }
 
     window.onload = async function() {
-      document.getElementById('latex-code').value = DEFAULT_LATEX_SOURCE;
-      await loadExamFromText(DEFAULT_LATEX_SOURCE);
+      document.getElementById('latex-code').value = SAMPLE_EXAM_SOURCE;
+      await loadExamFromText(SAMPLE_EXAM_SOURCE);
       lucide.createIcons();
     };
   </script>
