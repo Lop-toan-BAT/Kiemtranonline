@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-  <!-- Pako (Dùng dựng hình TikZ Kroki) -->
+  <!-- Pako (Dùng cho Kroki nén ảnh TikZ) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -24,7 +24,7 @@
         <i data-lucide="calculator" class="w-7 h-7"></i>
         <div>
           <h1 class="text-base sm:text-lg font-bold leading-tight">TOÁN THPT - KIỂM TRA TRỰC TUYẾN</h1>
-          <p class="text-xs text-indigo-200">Trắc nghiệm • Đúng/Sai • Trả lời ngắn</p>
+          <p class="text-xs text-indigo-200">Trắc nghiệm • Đúng/Sai • Trả lời ngắn • TikZ Angles</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -42,7 +42,7 @@
 
   <main class="max-w-4xl mx-auto p-4 flex-1 w-full">
 
-    <!-- KHU VỰC NẠP ĐỀ (TỰ ĐỘNG ẨN KHI HỌC SINH MỞ LINK) -->
+    <!-- KHU VỰC NẠP ĐỀ -->
     <section id="panel-admin" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6">
       <div class="flex items-center justify-between mb-3 border-b pb-3">
         <div>
@@ -50,7 +50,7 @@
             <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
             Nạp Đề &amp; Lấy Link Rút Gọn Gửi Học Sinh
           </h2>
-          <p class="text-xs text-slate-500 mt-0.5">Dán đề TeX $\rightarrow$ Bấm nút lấy link ngắn gọn gửi Zalo</p>
+          <p class="text-xs text-slate-500 mt-0.5">Hỗ trợ vẽ góc \pic{angle}, miền nghiệm tô màu blue!20 và danh sách \begin{enumerate}</p>
         </div>
       </div>
 
@@ -89,7 +89,7 @@
       </div>
     </section>
 
-    <!-- MÀN HÌNH ĐIỀN THÔNG TIN THÍ SINH (HỌC SINH MỞ LINK THẤY NGAY CÁI NÀY) -->
+    <!-- MÀN HÌNH ĐIỀN THÔNG TIN THÍ SINH -->
     <section id="screen-start" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
       <div class="text-center mb-5">
         <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -190,54 +190,82 @@
 
   <script>
     // Link Google Apps Script nhận điểm của thầy
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaBPufJqo0nJv_Oa7u5BjPwx7G5W2oQ5joyjsm8qu9CZwaT7vzZmUt4Id2yqnrAw0/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxodKVgJhYRv9SxN5nnHsXTEI9freN-yMmhaxAN11cWTucZHgOAvjFU0lfEobppQzY/exec";
 
-    // Đề mặc định
+    // Đề mẫu tích hợp đầy đủ 2 hình vẽ thực tế của thầy (Góc alpha/beta & Miền nghiệm tam giác)
     const DEFAULT_LATEX_SOURCE = `\\begin{ex}
-	Cho hình chóp $S.ABCD$ có đáy $ABCD$ là hình bình hành.
+	Một người quan sát đứng tại chân một tòa tháp dùng thiết bị bay (flycam) ghi lại hình ảnh như hình vẽ bên dưới:
 	\\begin{center}
-		\\begin{tikzpicture}[>=stealth,scale=0.9]
-		\\coordinate (A) at (0,0);
-		\\coordinate (B) at (3.5,0);
-		\\coordinate (D) at (-1.5,-1.2);
-		\\coordinate (C) at ($(B)+(D)-(A)$);
-		\\coordinate (S) at (0.8,2.8);
-		\\draw[thick] (S)--(D)--(C)--(B)--(S)--(C);
-		\\draw[dashed,thick] (D)--(A)--(B) (S)--(A);
-		\\foreach \\p/\\pos in {A/left,B/right,C/below right,D/below left,S/above}
-		\\node[\\pos] at (\\p) {$\\p$};
+		\\begin{tikzpicture}[>=stealth,line join=round,line cap=round,font=\\footnotesize,scale=0.95]
+		% Tháp / Tòa nhà
+		\\draw (0,0) -- (2,0) -- (2,4.8) -- (0,4.8) -- cycle;
+		\\draw (1,0) -- (1,4.8);
+		\\foreach \\y in {0.8,1.6,...,4.0}{
+			\\draw (0,\\y) -- (2,\\y);
+		}
+		% Tọa độ các điểm quan sát
+		\\coordinate (B) at (2,0.3);
+		\\coordinate (A) at (2,5.1);
+		\\coordinate (K) at (4.8,5.1);
+		\\coordinate (H) at (4.8,0.3);
+		\\coordinate (D) at (4.8,5.1+1.6166);
+		\\coordinate (E) at (4.8,0);
+		% Flycam
+		\\filldraw[fill=blue!40,draw=black] (D) circle (3pt);
+		\\draw[thick] ($(D)+(-0.35,0.15)$) -- ($(D)+(0.35,-0.15)$);
+		\\draw[thick] ($(D)+(-0.35,-0.15)$) -- ($(D)+(0.35,0.15)$);
+		% Các đường nối và gióng
+		\\draw (2,0) -- (E) (A) -- (D) -- (B);
+		\\draw[dashed] (D) -- (E) (A) -- (K) (B) -- (H);
+		% Đánh dấu điểm và góc
+		\\fill (A) circle(1.2pt) node[left]{$A$};
+		\\fill (B) circle(1.2pt) node[left]{$B$};
+		\\fill (D) circle(1.2pt) node[above right]{$D$};
+		\\pic[draw,angle radius=5mm] {angle = K--A--D};
+		\\pic[draw,angle radius=4mm] {angle = H--B--D};
+		\\node at (0,2.4) [left]{$h$};
+		\\node at ($(A)+(0.7,0.25)$) {$\\alpha$};
+		\\node at ($(B)+(0.8,0.35)$) {$\\beta$};
 		\\end{tikzpicture}
 	\\end{center}
-	Hai đường thẳng $SA$ và $CD$ có vị trí tương đối là
+	Cho biết các khẳng định sau:
+	\\begin{enumerate}[a)]
+		\\item Góc $\\alpha$ là góc nâng từ điểm $A$ đến flycam $D$;
+		\\item Độ cao của flycam so với mặt đất là đoạn thẳng $DE$.
+	\\end{enumerate}
+	Góc nâng từ vị trí $A$ quan sát flycam $D$ được ký hiệu là
 	\\choice
-	{Cắt nhau.}
-	{Song song.}
-	{\\True Chéo nhau.}
-	{Trùng nhau.}
-	\\loigiai{Đường thẳng $SA$ cắt $(ABCD)$ tại $A \\notin CD$, do đó $SA$ và $CD$ chéo nhau.}
+	{\\True $\\alpha$}
+	{$\\beta$}
+	{$h$}
+	{$90^\\circ$}
+	\\loigiai{Dựa vào hình vẽ, góc tạo bởi tia ngắm $AD$ và phương nằm ngang $AK$ là góc nâng $\\alpha$.}
 \\end{ex}
 
 \\begin{ex}
-	Cho hai đường thẳng $d_1, d_2$ có đồ thị như hình vẽ bên dưới:
-	\\begin{tikzpicture}[>=stealth,scale=1.1,line join=round,line cap=round]
-		\\draw[->] (-1.5,0) -- (3,0) node[below] {$x$};
-		\\draw[->] (0,-1) -- (0,3.2) node[left] {$y$};
-		\\draw (0,0) node[below left] {$O$};
-		\\draw[thick, domain=-0.8:2.6] plot (\\x, {2 - \\x}) node[right] {$d_1: x+y-2=0$};
-		\\draw[thick, domain=-0.8:2.2] plot (\\x, {\\x + 1}) node[above right] {$d_2: x-y+1=0$};
-		\\fill (0,2) circle (1.5pt) node[left] {$(0;2)$};
-		\\fill (0,1) circle (1.5pt) node[left] {$(0;1)$};
-		\\fill (0.5,1.5) circle (1.5pt) node[above] {$M\\left(\\frac{1}{2};\\frac{3}{2}\\right)$};
-		\\fill (2,0) circle (1.5pt) node[below] {$2$};
-		\\fill (-1,0) circle (1.5pt) node[below] {$-1$};
-	\\end{tikzpicture}
-	Tọa độ giao điểm $M$ của hai đường thẳng là
+	Miền nghiệm của hệ bất phương trình được biểu diễn bởi miền tam giác tô màu trong hình vẽ sau:
+	\\begin{center}
+		\\begin{tikzpicture}[scale=0.8,>=stealth]
+			\\draw[->] (-1.5,0) -- (4,0) node[below] {$x$};
+			\\draw[->] (0,-4.5) -- (0,3) node[left] {$y$};
+			\\node[below left] at (0,0) {$O$};
+			% Miền nghiệm tam giác A(2,0), B(0,2), C(0,-4)
+			\\fill[blue!20] (0,2) -- (2,0) -- (0,-4) -- cycle;
+			\\draw[thick] (-0.5,2.5) -- (3,-1) node[right] {$x+y=2$};
+			\\draw[thick] (-0.5,-5) -- (2.5,1) node[right] {$2x-y=4$};
+			\\draw[thick] (0,-4.5) -- (0,2.8);
+			\\filldraw (2,0) circle (1.5pt) node[above right] {$A(2;0)$};
+			\\filldraw (0,2) circle (1.5pt) node[left] {$B(0;2)$};
+			\\filldraw (0,-4) circle (1.5pt) node[left] {$C(0;-4)$};
+		\\end{tikzpicture}
+	\\end{center}
+	Tọa độ các đỉnh của miền tam giác là
 	\\choice
-	{\\True $M\\left(\\dfrac{1}{2}; \\dfrac{3}{2}\\right)$}
-	{$M(0; 2)$}
-	{$M(-1; 0)$}
-	{$M(2; 0)$}
-	\\loigiai{Tọa độ giao điểm $M$ là nghiệm của hệ: $\\begin{cases} x + y - 2 = 0 \\\\ x - y + 1 = 0 \\end{cases} \\Leftrightarrow \\begin{cases} x = \\dfrac{1}{2} \\\\[1mm] y = \\dfrac{3}{2} \\end{cases}$.}
+	{\\True $A(2;0), B(0;2), C(0;-4)$}
+	{$A(0;2), B(2;0), C(0;-4)$}
+	{$A(2;0), B(0;-2), C(0;4)$}
+	{$A(-2;0), B(0;2), C(0;-4)$}
+	\\loigiai{Các đỉnh của tam giác giới hạn miền nghiệm lần lượt là $A(2;0)$, $B(0;2)$ và $C(0;-4)$.}
 \\end{ex}`;
 
     let examData = [];
@@ -251,7 +279,6 @@
       document.getElementById('panel-admin').classList.toggle('hidden');
     }
 
-    // --- TẠO LINK RÚT GỌN (LƯU CHUỖI CÔNG CỘNG SIÊU TỐC KHÔNG CẦN CÀI ĐẶT) ---
     async function handleGenerateShortLink() {
       const raw = document.getElementById('latex-code').value.trim();
       const timeMin = parseInt(document.getElementById('cfg-time').value) || 45;
@@ -264,7 +291,6 @@
 
       try {
         const payload = JSON.stringify({ t: timeMin, tex: raw });
-        // Gửi lên dpaste để lấy mã ngắn (mã tồn tại 30 ngày)
         const res = await fetch("https://dpaste.com/api/", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -272,10 +298,8 @@
         });
 
         if (res.ok) {
-          const rawUrl = (await res.text()).trim(); // Dạng: https://dpaste.com/ABCXYZ
+          const rawUrl = (await res.text()).trim();
           const pasteId = rawUrl.split('/').filter(Boolean).pop();
-          
-          // Link ngắn gọn của thầy
           const shortUrl = `${window.location.origin}${window.location.pathname}?id=${pasteId}`;
           
           document.getElementById('share-link-input').value = shortUrl;
@@ -302,7 +326,7 @@
       });
     }
 
-    // Stack Parser đếm ngoặc sâu
+    // Bóc tách ngoặc nhọn lồng nhau (Stack Parser)
     function extractBracedBlocks(text, startIndex = 0) {
       let blocks = [];
       let depth = 0;
@@ -330,14 +354,40 @@
       return blocks;
     }
 
+    // Chuyển đổi \begin{enumerate}[a)] sang cấu trúc HTML hợp lệ cho KaTeX
+    function convertEnumerateToHtml(text) {
+      return text.replace(/\\begin\{enumerate\}(?:\[(.*?)\])?([\s\S]*?)\\end\{enumerate\}/g, function(match, opt, body) {
+        const isAlpha = !opt || opt.includes('a');
+        const items = body.split(/\\item\s*/).filter(x => x.trim().length > 0);
+        const alphaList = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+        
+        let html = '<div class="my-2.5 pl-3 space-y-1.5 border-l-2 border-indigo-200">';
+        items.forEach((item, idx) => {
+          const prefix = isAlpha ? `${alphaList[idx] || (idx + 1)})` : `${idx + 1})`;
+          html += `<div class="flex items-start gap-2 text-sm"><strong class="text-indigo-600 font-bold shrink-0">${prefix}</strong><div class="leading-relaxed text-slate-800">${item.trim()}</div></div>`;
+        });
+        html += '</div>';
+        return html;
+      });
+    }
+
     function cleanLatexText(str) {
-      return str.replace(/``/g, '“').replace(/''/g, '”').replace(/\\\\\s*$/g, '').trim();
+      return str
+        .replace(/``/g, '“')
+        .replace(/''/g, '”')
+        .replace(/\\\\\s*$/g, '')
+        .trim();
     }
 
     function autoFixTikzCode(code) {
-      return code.replace(/\\begin\{center\}/g, '').replace(/\\end\{center\}/g, '').replace(/\\colon/g, ':').trim();
+      return code
+        .replace(/\\begin\{center\}/g, '')
+        .replace(/\\end\{center\}/g, '')
+        .replace(/\\colon/g, ':')
+        .trim();
     }
 
+    // Nạp đầy đủ thư viện angles, quotes, patterns cho TikZ
     async function convertTikzToSvg(rawTikz) {
       try {
         const cleanedTikz = autoFixTikzCode(rawTikz);
@@ -346,7 +396,7 @@
 \\usepackage{tikz}
 \\usepackage{pgfplots}
 \\pgfplotsset{compat=1.18}
-\\usetikzlibrary{calc,arrows.meta,intersections}
+\\usetikzlibrary{calc,arrows.meta,intersections,angles,quotes,patterns}
 \\begin{document}
 ${cleanedTikz}
 \\end{document}`;
@@ -366,7 +416,10 @@ ${cleanedTikz}
     }
 
     async function parseLatexExam(rawSource) {
-      let cleaned = rawSource.replace(/(^|[^\\])%.*$/gm, '$1').replace(/\r\n/g, '\n');
+      // 1. Chuyển đổi môi trường enumerate trước
+      let textConverted = convertEnumerateToHtml(rawSource);
+      let cleaned = textConverted.replace(/(^|[^\\])%.*$/gm, '$1').replace(/\r\n/g, '\n');
+      
       const parsed = [];
       const exRegex = /\\begin\{(ex|bt)\}([\s\S]*?)\\end\{\1\}/g;
       let match;
@@ -426,6 +479,7 @@ ${cleanedTikz}
           }
         }
 
+        // Dựng hình TikZ sang SVG
         const tikzRegex = /(\\begin\{center\}\s*)?\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}(\s*\\end\{center\})?/g;
         const tikzMatches = questionText.match(tikzRegex);
         if (tikzMatches) {
@@ -551,7 +605,7 @@ ${cleanedTikz}
           `;
         }
 
-        const typeLabels = { MC: 'LC', TF: 'Đ/S', SA: 'KQ' };
+        const typeLabels = { MC: 'Nhiều lựa chọn', TF: 'Đúng / Sai', SA: 'Trả lời ngắn' };
 
         card.innerHTML = `
           <div class="flex items-start gap-2.5 mb-2">
@@ -752,14 +806,12 @@ ${cleanedTikz}
       renderMath(container);
     }
 
-    // --- KHI TRANG TẢI ---
+    // KHỞI ĐỘNG HỆ THỐNG
     window.onload = async function() {
       const urlParams = new URLSearchParams(window.location.search);
       const pasteId = urlParams.get('id');
 
-      // Nếu là học sinh vào bằng link ngắn: ?id=...
       if (pasteId) {
-        // Ẩn thanh quản trị của giáo viên
         document.getElementById('panel-admin').classList.add('hidden');
         document.getElementById('btn-open-admin').classList.add('hidden');
 
@@ -767,14 +819,13 @@ ${cleanedTikz}
         sLoader.classList.remove('hidden');
 
         try {
-          // Lấy nội dung đề tương ứng từ dpaste
           const res = await fetch(`https://dpaste.com/${pasteId}.txt`);
           if (res.ok) {
             const rawContent = await res.text();
             const data = JSON.parse(rawContent);
             await loadExamFromText(data.tex, data.t);
           } else {
-            alert("Không tìm thấy đề thi này hoặc đề đã quá hạn 30 ngày!");
+            alert("Không tìm thấy đề thi này hoặc đề đã quá hạn!");
           }
         } catch (e) {
           alert("Lỗi tải đề thi, vui lòng thử lại!");
@@ -782,7 +833,6 @@ ${cleanedTikz}
           sLoader.classList.add('hidden');
         }
       } else {
-        // Giáo viên vào link gốc: mở khung nạp đề
         document.getElementById('latex-code').value = DEFAULT_LATEX_SOURCE;
         await loadExamFromText(DEFAULT_LATEX_SOURCE, 45);
       }
