@@ -379,11 +379,18 @@
         .trim();
     }
 
-    function autoFixTikzCode(code) {
+   function autoFixTikzCode(code) {
       return code
         .replace(/\\begin\{center\}/g, '')
         .replace(/\\end\{center\}/g, '')
         .replace(/\\colon/g, ':')
+        // Tự động bọc ngoặc nhọn cho các biểu thức tọa độ có phép tính + - * /
+        .replace(/\(([0-9.\-]+)\s*,\s*([0-9.\-+*/\s]+)\)/g, function(match, x, y) {
+          if (/[+\-*/]/.test(y) && !y.trim().startsWith('{')) {
+            return `(${x},{${y.trim()}})`;
+          }
+          return match;
+        })
         .trim();
     }
 
