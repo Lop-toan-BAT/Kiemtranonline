@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-  <!-- Pako (Nén dữ liệu vào URL & nén TikZ) -->
+  <!-- Pako (Dùng cho Kroki nén TikZ) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -50,7 +50,7 @@
             <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
             Trình Tạo Đề &amp; Xuất Link Cho Học Sinh
           </h2>
-          <p class="text-xs text-slate-500 mt-0.5">Nạp đề xong bấm "Biên Dịch &amp; Tạo Link Gửi Lớp" để lấy link gửi vào nhóm Zalo</p>
+          <p class="text-xs text-slate-500 mt-0.5">Nạp đề xong bấm "Biên Dịch &amp; Tạo Link Gửi Lớp" để lấy link ngắn gửi cho học sinh</p>
         </div>
         <button type="button" onclick="loadExamFromText(SAMPLE_EXAM_SOURCE, 45)" class="text-xs text-indigo-600 hover:underline font-semibold">Nạp đề mẫu</button>
       </div>
@@ -93,11 +93,11 @@
 
       <div id="parse-loading" class="hidden mt-3 text-xs text-indigo-600 font-semibold items-center gap-2">
         <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <span>Đang đóng gói dữ liệu và mã hóa đường dẫn...</span>
+        <span id="loading-msg">Đang kết nối lưu đề lên máy chủ...</span>
       </div>
     </section>
 
-    <!-- MÀN HÌNH ĐIỀN THÔNG TIN THÍ SINH (HỌC SINH MỞ LINK SẼ THẤY NGAY MÀN HÌNH NÀY) -->
+    <!-- MÀN HÌNH ĐIỀN THÔNG TIN THÍ SINH (HỌC SINH MỞ LINK SẼ THẤY MÀN HÌNH NÀY) -->
     <section id="screen-start" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
       <div class="text-center mb-5">
         <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -192,11 +192,10 @@
   </main>
 
   <script>
-    // Link nhận điểm Google Apps Script của thầy (ĐIỀN LINK CỦA THẦY VÀO ĐÂY)
+    // Link Web App nhận điểm và lưu đề của thầy
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaBPufJqo0nJv_Oa7u5BjPwx7G5W2oQ5joyjsm8qu9CZwaT7vzZmUt4Id2yqnrAw0/exec";
 
-    const SAMPLE_EXAM_SOURCE = `% ĐỀ MẪU TỔNG HỢP CÁC DẠNG
-\\begin{ex}
+    const SAMPLE_EXAM_SOURCE = `\\begin{ex}
 	Cho hàm số bậc hai $y = ax^2 + bx + c$ có đồ thị như hình vẽ bên dưới:
 	\\begin{tikzpicture}[>=stealth,scale=1]
 		\\draw[->] (-2,0) -- (3,0) node[below] {$x$};
@@ -212,22 +211,6 @@
 	{$(-1; 0)$}
 	{$(1; 0)$}
 	\\loigiai{Dựa vào hình vẽ, parabol cắt trục tung tại điểm có tọa độ $(0; -1)$.}
-\\end{ex}
-
-\\begin{ex}
-	Cho tam giác $ABC$ có $a = 6, b = 8, c = 10$. Xét tính đúng sai của các khẳng định sau:
-	\\choiceTF
-	{\\True Tam giác $ABC$ vuông tại $A$}
-	{Diện tích tam giác $ABC$ bằng $48$}
-	{\\True Bán kính đường tròn ngoại tiếp $R = 5$}
-	{\\True Bán kính đường tròn nội tiếp $r = 2$}
-	\\loigiai{Ta có $6^2 + 8^2 = 10^2$ nên tam giác vuông tại $A$. Diện tích $S = \\dfrac{1}{2} \\cdot 6 \\cdot 8 = 24$.}
-\\end{ex}
-
-\\begin{ex}
-	Tìm giá trị lớn nhất của hàm số $y = -x^2 + 4x + 1$ trên $\\mathbb{R}$.
-	\\shortans{5}
-	\\loigiai{Ta có $y = -(x - 2)^2 + 5 \\le 5$. Giá trị lớn nhất bằng $5$ khi $x = 2$.}
 \\end{ex}`;
 
     let examData = [];
@@ -241,52 +224,69 @@
       document.getElementById('panel-admin').classList.toggle('hidden');
     }
 
-    // --- BỘ NÉN VÀ GIẢI NÉN URL SIÊU AN TOÀN (CHUNK-SAFE BASE64 & UTF-8) ---
-    function compressToHash(obj) {
-      const jsonStr = JSON.stringify(obj);
-      const bytes = new TextEncoder().encode(jsonStr);
-      const deflated = pako.deflate(bytes, { level: 9 });
-      
-      let binary = '';
-      const chunkSize = 8192;
-      for (let i = 0; i < deflated.length; i += chunkSize) {
-        binary += String.fromCharCode.apply(null, deflated.subarray(i, i + chunkSize));
-      }
-      return btoa(binary)
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
-    }
-
-    function decompressFromHash(hashStr) {
-      let b64 = hashStr.replace(/-/g, '+').replace(/_/g, '/');
-      while (b64.length % 4) b64 += '=';
-      
-      const binary = atob(b64);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      const inflated = pako.inflate(bytes);
-      const jsonStr = new TextDecoder().decode(inflated);
-      return JSON.parse(jsonStr);
-    }
-
-    // Xử lý nạp đề và sinh link cho học sinh
+    // 1. TẠO LINK VÀ LƯU ĐỀ LÊN GOOGLE APPS SCRIPT
     async function handleBuildAndGenerateShareLink() {
       const raw = document.getElementById('latex-code').value.trim();
       const timeMin = parseInt(document.getElementById('cfg-time').value) || 45;
       if (!raw) return alert("Vui lòng nhập nội dung đề thi trước!");
 
-      await loadExamFromText(raw, timeMin);
+      // Tạo mã đề ngẫu nhiên 6 ký tự
+      const examId = "de_" + Math.random().toString(36).substring(2, 8);
 
-      const payload = { t: timeMin, tex: raw };
-      const compressed = compressToHash(payload);
-      
-      const shareUrl = `${window.location.origin}${window.location.pathname}#de=${compressed}`;
-      
-      document.getElementById('share-link-input').value = shareUrl;
-      document.getElementById('box-share-link').classList.remove('hidden');
+      const loader = document.getElementById('parse-loading');
+      document.getElementById('loading-msg').innerText = "Đang lưu đề lên máy chủ Google...";
+      loader.classList.remove('hidden');
+      loader.classList.add('flex');
+
+      try {
+        // Dùng iframe form submit để gửi mã đề lớn mà không lo bị lỗi CORS
+        const iframeName = 'hidden_iframe_save';
+        let iframe = document.getElementById(iframeName);
+        if (!iframe) {
+          iframe = document.createElement('iframe');
+          iframe.id = iframeName;
+          iframe.name = iframeName;
+          iframe.style.display = 'none';
+          document.body.appendChild(iframe);
+        }
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = GOOGLE_SCRIPT_URL;
+        form.target = iframeName;
+
+        const pData = {
+          action: "save_exam",
+          examId: examId,
+          time: timeMin,
+          tex: raw
+        };
+
+        for (const k in pData) {
+          const inp = document.createElement('input');
+          inp.type = 'hidden';
+          inp.name = k;
+          inp.value = pData[k];
+          form.appendChild(inp);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+        setTimeout(() => document.body.removeChild(form), 1000);
+
+        // Sinh link rút gọn gửi cho học sinh
+        const cleanUrl = `${window.location.origin}${window.location.pathname}?de=${examId}`;
+        document.getElementById('share-link-input').value = cleanUrl;
+        document.getElementById('box-share-link').classList.remove('hidden');
+
+        // Biên dịch hiển thị xem trước
+        await loadExamFromText(raw, timeMin);
+      } catch (err) {
+        alert("Lỗi khi kết nối lưu đề!");
+      } finally {
+        loader.classList.add('hidden');
+        loader.classList.remove('flex');
+      }
     }
 
     function copyShareLink() {
@@ -326,7 +326,7 @@
       reader.readAsText(file);
     }
 
-    // Stack Parser đếm ngoặc sâu
+    // Stack Parser bóc tách ngoặc
     function extractBracedBlocks(text, startIndex = 0) {
       let blocks = [];
       let depth = 0;
@@ -476,6 +476,7 @@ ${cleanedTikz}
 
     async function loadExamFromText(source, minutes = 45) {
       const loader = document.getElementById('parse-loading');
+      document.getElementById('loading-msg').innerText = "Đang biên dịch đề và dựng hình TikZ...";
       loader.classList.remove('hidden');
       loader.classList.add('flex');
 
@@ -485,7 +486,7 @@ ${cleanedTikz}
       loader.classList.remove('flex');
 
       if (examData.length === 0) {
-        alert("Không nhận diện được câu hỏi nào!");
+        alert("Không nhận diện được câu hỏi nào trong đề!");
         return;
       }
 
@@ -789,30 +790,31 @@ ${cleanedTikz}
       renderMath(container);
     }
 
-    // --- XỬ LÝ KHỞI TẠO TRANG ---
+    // 2. TỰ ĐỘNG TẢI ĐỀ TỪ GOOGLE KHI HỌC SINH MỞ LINK CÓ ?de=...
     window.onload = async function() {
-      const hash = window.location.hash;
-      
-      // Nếu có tham số đề thi #de=... (Học sinh mở link)
-      if (hash && hash.startsWith('#de=')) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const examId = urlParams.get('de');
+
+      if (examId) {
+        // Học sinh vào bằng link: Ẩn hoàn toàn bảng nạp đề
+        const adminPanel = document.getElementById('panel-admin');
+        const adminBtn = document.getElementById('btn-open-admin');
+        if (adminPanel) adminPanel.classList.add('hidden');
+        if (adminBtn) adminBtn.classList.add('hidden');
+
         try {
-          const compressed = hash.substring(4);
-          const data = decompressFromHash(compressed);
-
-          // Ẩn bảng quản trị nạp đề
-          const adminPanel = document.getElementById('panel-admin');
-          const adminBtn = document.getElementById('btn-open-admin');
-          if (adminPanel) adminPanel.classList.add('hidden');
-          if (adminBtn) adminBtn.classList.add('hidden');
-
-          // Nạp đề học sinh
-          await loadExamFromText(data.tex, data.t);
-        } catch (err) {
-          console.error("Lỗi giải nén đề từ link:", err);
-          alert("Không thể đọc đề thi từ link này. Vui lòng kiểm tra lại đường dẫn!");
+          const res = await fetch(`${GOOGLE_SCRIPT_URL}?de=${examId}`);
+          const data = await res.json();
+          if (data && data.tex) {
+            await loadExamFromText(data.tex, data.t || 45);
+          } else {
+            alert("Không tìm thấy dữ liệu đề thi này hoặc đề đã hết hạn!");
+          }
+        } catch (e) {
+          alert("Lỗi tải đề thi từ máy chủ, học sinh vui lòng bấm tải lại trang!");
         }
       } else {
-        // Giáo viên vào trang gốc
+        // Giáo viên vào link gốc: Mở khung nạp đề
         const adminPanel = document.getElementById('panel-admin');
         if (adminPanel) adminPanel.classList.remove('hidden');
         document.getElementById('latex-code').value = SAMPLE_EXAM_SOURCE;
