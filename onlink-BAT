@@ -551,7 +551,7 @@ ${cleanedTikz}
           `;
         }
 
-        const typeLabels = { MC: 'Nhiều lựa chọn', TF: 'Đúng / Sai', SA: 'Trả lời ngắn' };
+        const typeLabels = { MC: 'LC', TF: 'Đ/S', SA: 'KQ' };
 
         card.innerHTML = `
           <div class="flex items-start gap-2.5 mb-2">
