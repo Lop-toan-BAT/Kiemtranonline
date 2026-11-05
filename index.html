@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-  <!-- Pako (Dùng cho Kroki nén TikZ) -->
+  <!-- Pako (Dùng dựng hình TikZ Kroki) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -19,7 +19,7 @@
 
   <!-- Header -->
   <header class="bg-indigo-700 text-white shadow sticky top-0 z-30">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
         <i data-lucide="calculator" class="w-7 h-7"></i>
         <div>
@@ -40,50 +40,42 @@
     </div>
   </header>
 
-  <main class="max-w-5xl mx-auto p-4 flex-1 w-full">
+  <main class="max-w-4xl mx-auto p-4 flex-1 w-full">
 
-    <!-- KHU VỰC QUẢN TRỊ NẠP ĐỀ (TỰ ĐỘNG ẨN KHI HỌC SINH MỞ LINK) -->
-    <section id="panel-admin" class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
-      <div class="flex items-center justify-between mb-4 border-b pb-3">
+    <!-- KHU VỰC NẠP ĐỀ (TỰ ĐỘNG ẨN KHI HỌC SINH MỞ LINK) -->
+    <section id="panel-admin" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-6">
+      <div class="flex items-center justify-between mb-3 border-b pb-3">
         <div>
           <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
             <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
-            Trình Tạo Đề &amp; Xuất Link Cho Học Sinh
+            Nạp Đề &amp; Lấy Link Rút Gọn Gửi Học Sinh
           </h2>
-          <p class="text-xs text-slate-500 mt-0.5">Nạp đề xong bấm "Biên Dịch &amp; Tạo Link Gửi Lớp" để lấy link ngắn gửi cho học sinh</p>
+          <p class="text-xs text-slate-500 mt-0.5">Dán đề TeX $\rightarrow$ Bấm nút lấy link ngắn gọn gửi Zalo</p>
         </div>
-        <button type="button" onclick="loadExamFromText(SAMPLE_EXAM_SOURCE, 45)" class="text-xs text-indigo-600 hover:underline font-semibold">Nạp đề mẫu</button>
       </div>
 
-      <!-- Kéo thả file .tex -->
-      <div id="drop-zone" class="border-2 border-dashed border-indigo-200 hover:border-indigo-500 rounded-xl p-4 text-center bg-indigo-50/30 transition cursor-pointer mb-3" onclick="document.getElementById('file-input').click()">
-        <input type="file" id="file-input" accept=".tex,.txt" class="hidden" onchange="handleFileSelect(event)">
-        <i data-lucide="upload-cloud" class="w-7 h-7 mx-auto text-indigo-600 mb-1"></i>
-        <p class="text-xs font-bold text-slate-700">Kéo thả file <span class="text-indigo-600 font-mono">.tex</span> vào đây hoặc bấm chọn file</p>
-      </div>
-
-      <textarea id="latex-code" rows="7" class="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed" placeholder="Dán nội dung mã LaTeX vào đây..."></textarea>
+      <textarea id="latex-code" rows="7" class="w-full p-3 font-mono text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none leading-relaxed" placeholder="Dán nội dung mã LaTeX đề thi vào đây..."></textarea>
 
       <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2 text-xs">
-          <label class="font-semibold text-slate-700">Thời gian làm bài:</label>
+          <label class="font-semibold text-slate-700">Thời gian:</label>
           <input type="number" id="cfg-time" value="45" class="w-16 px-2 py-1 border rounded text-center font-bold"> 
           <span>phút</span>
         </div>
-        <button id="btn-build" type="button" onclick="handleBuildAndGenerateShareLink()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-2 transition">
+        <button id="btn-build" type="button" onclick="handleGenerateShortLink()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow flex items-center gap-2 transition">
           <i data-lucide="link" class="w-4 h-4"></i>
-          <span>Biên Dịch &amp; Tạo Link Gửi Lớp</span>
+          <span>Biên Dịch &amp; Tạo Link Rút Gọn</span>
         </button>
       </div>
 
-      <!-- KHUNG HIỆN ĐƯỜNG LINK CHIA SẺ -->
+      <!-- Ô HIỂN THỊ LINK NGẮN SAO CHÉP -->
       <div id="box-share-link" class="hidden mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl">
         <p class="text-xs font-bold text-emerald-800 mb-1 flex items-center gap-1.5">
           <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600"></i>
-          Đã tạo link đề thi thành công! Thầy copy link dưới đây gửi cho học sinh:
+          Đã tạo link đề ngắn gọn! Thầy bấm sao chép để gửi lớp:
         </p>
         <div class="flex items-center gap-2 mt-2">
-          <input type="text" id="share-link-input" readonly class="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-xs font-mono text-slate-700 select-all outline-none">
+          <input type="text" id="share-link-input" readonly class="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-xs font-mono font-bold text-indigo-700 select-all outline-none">
           <button type="button" onclick="copyShareLink()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shrink-0 flex items-center gap-1.5 transition">
             <i data-lucide="copy" class="w-4 h-4"></i>
             <span id="copy-btn-text">Sao chép</span>
@@ -93,11 +85,11 @@
 
       <div id="parse-loading" class="hidden mt-3 text-xs text-indigo-600 font-semibold items-center gap-2">
         <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-        <span id="loading-msg">Đang kết nối lưu đề lên máy chủ...</span>
+        <span id="loading-msg">Đang khởi tạo liên kết bài thi...</span>
       </div>
     </section>
 
-    <!-- MÀN HÌNH ĐIỀN THÔNG TIN THÍ SINH (HỌC SINH MỞ LINK SẼ THẤY MÀN HÌNH NÀY) -->
+    <!-- MÀN HÌNH ĐIỀN THÔNG TIN THÍ SINH (HỌC SINH MỞ LINK THẤY NGAY CÁI NÀY) -->
     <section id="screen-start" class="max-w-md mx-auto mt-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
       <div class="text-center mb-5">
         <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center mx-auto mb-2">
@@ -105,6 +97,11 @@
         </div>
         <h2 class="text-lg font-bold text-slate-900">BÀI THI KIỂM TRA TOÁN HỌC</h2>
         <p class="text-xs text-slate-500 mt-1">Đề gồm <strong id="lbl-q-count" class="text-indigo-600 font-bold">0</strong> câu hỏi</p>
+      </div>
+
+      <div id="student-loading" class="hidden flex text-xs text-indigo-600 font-semibold items-center justify-center gap-2 mb-4">
+        <div class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+        <span>Đang nạp dữ liệu đề thi và hình vẽ...</span>
       </div>
 
       <form id="form-start" class="space-y-3">
@@ -192,25 +189,55 @@
   </main>
 
   <script>
-    // Link Web App nhận điểm và lưu đề của thầy
+    // Link Google Apps Script nhận điểm của thầy
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaBPufJqo0nJv_Oa7u5BjPwx7G5W2oQ5joyjsm8qu9CZwaT7vzZmUt4Id2yqnrAw0/exec";
 
-    const SAMPLE_EXAM_SOURCE = `\\begin{ex}
-	Cho hàm số bậc hai $y = ax^2 + bx + c$ có đồ thị như hình vẽ bên dưới:
-	\\begin{tikzpicture}[>=stealth,scale=1]
-		\\draw[->] (-2,0) -- (3,0) node[below] {$x$};
-		\\draw[->] (0,-2) -- (0,3) node[left] {$y$};
-		\\draw (0,0) node[below left] {$O$};
-		\\draw[thick, blue, domain=-1.2:2.2] plot (\\x, {(\\x)^2 - \\x - 1});
-		\\fill (0,-1) circle (1.5pt) node[left] {$-1$};
-	\\end{tikzpicture}
-	Điểm cắt trục tung của đồ thị hàm số có tọa độ là
+    // Đề mặc định
+    const DEFAULT_LATEX_SOURCE = `\\begin{ex}
+	Cho hình chóp $S.ABCD$ có đáy $ABCD$ là hình bình hành.
+	\\begin{center}
+		\\begin{tikzpicture}[>=stealth,scale=0.9]
+		\\coordinate (A) at (0,0);
+		\\coordinate (B) at (3.5,0);
+		\\coordinate (D) at (-1.5,-1.2);
+		\\coordinate (C) at ($(B)+(D)-(A)$);
+		\\coordinate (S) at (0.8,2.8);
+		\\draw[thick] (S)--(D)--(C)--(B)--(S)--(C);
+		\\draw[dashed,thick] (D)--(A)--(B) (S)--(A);
+		\\foreach \\p/\\pos in {A/left,B/right,C/below right,D/below left,S/above}
+		\\node[\\pos] at (\\p) {$\\p$};
+		\\end{tikzpicture}
+	\\end{center}
+	Hai đường thẳng $SA$ và $CD$ có vị trí tương đối là
 	\\choice
-	{\\True $(0; -1)$}
-	{$(0; 1)$}
-	{$(-1; 0)$}
-	{$(1; 0)$}
-	\\loigiai{Dựa vào hình vẽ, parabol cắt trục tung tại điểm có tọa độ $(0; -1)$.}
+	{Cắt nhau.}
+	{Song song.}
+	{\\True Chéo nhau.}
+	{Trùng nhau.}
+	\\loigiai{Đường thẳng $SA$ cắt $(ABCD)$ tại $A \\notin CD$, do đó $SA$ và $CD$ chéo nhau.}
+\\end{ex}
+
+\\begin{ex}
+	Cho hai đường thẳng $d_1, d_2$ có đồ thị như hình vẽ bên dưới:
+	\\begin{tikzpicture}[>=stealth,scale=1.1,line join=round,line cap=round]
+		\\draw[->] (-1.5,0) -- (3,0) node[below] {$x$};
+		\\draw[->] (0,-1) -- (0,3.2) node[left] {$y$};
+		\\draw (0,0) node[below left] {$O$};
+		\\draw[thick, domain=-0.8:2.6] plot (\\x, {2 - \\x}) node[right] {$d_1: x+y-2=0$};
+		\\draw[thick, domain=-0.8:2.2] plot (\\x, {\\x + 1}) node[above right] {$d_2: x-y+1=0$};
+		\\fill (0,2) circle (1.5pt) node[left] {$(0;2)$};
+		\\fill (0,1) circle (1.5pt) node[left] {$(0;1)$};
+		\\fill (0.5,1.5) circle (1.5pt) node[above] {$M\\left(\\frac{1}{2};\\frac{3}{2}\\right)$};
+		\\fill (2,0) circle (1.5pt) node[below] {$2$};
+		\\fill (-1,0) circle (1.5pt) node[below] {$-1$};
+	\\end{tikzpicture}
+	Tọa độ giao điểm $M$ của hai đường thẳng là
+	\\choice
+	{\\True $M\\left(\\dfrac{1}{2}; \\dfrac{3}{2}\\right)$}
+	{$M(0; 2)$}
+	{$M(-1; 0)$}
+	{$M(2; 0)$}
+	\\loigiai{Tọa độ giao điểm $M$ là nghiệm của hệ: $\\begin{cases} x + y - 2 = 0 \\\\ x - y + 1 = 0 \\end{cases} \\Leftrightarrow \\begin{cases} x = \\dfrac{1}{2} \\\\[1mm] y = \\dfrac{3}{2} \\end{cases}$.}
 \\end{ex}`;
 
     let examData = [];
@@ -224,65 +251,41 @@
       document.getElementById('panel-admin').classList.toggle('hidden');
     }
 
-    // 1. TẠO LINK VÀ LƯU ĐỀ LÊN GOOGLE APPS SCRIPT
-    async function handleBuildAndGenerateShareLink() {
+    // --- TẠO LINK RÚT GỌN (LƯU CHUỖI CÔNG CỘNG SIÊU TỐC KHÔNG CẦN CÀI ĐẶT) ---
+    async function handleGenerateShortLink() {
       const raw = document.getElementById('latex-code').value.trim();
       const timeMin = parseInt(document.getElementById('cfg-time').value) || 45;
-      if (!raw) return alert("Vui lòng nhập nội dung đề thi trước!");
-
-      // Tạo mã đề ngẫu nhiên 6 ký tự
-      const examId = "de_" + Math.random().toString(36).substring(2, 8);
+      if (!raw) return alert("Vui lòng nhập nội dung đề thi!");
 
       const loader = document.getElementById('parse-loading');
-      document.getElementById('loading-msg').innerText = "Đang lưu đề lên máy chủ Google...";
+      document.getElementById('loading-msg').innerText = "Đang tạo mã liên kết rút gọn...";
       loader.classList.remove('hidden');
       loader.classList.add('flex');
 
       try {
-        // Dùng iframe form submit để gửi mã đề lớn mà không lo bị lỗi CORS
-        const iframeName = 'hidden_iframe_save';
-        let iframe = document.getElementById(iframeName);
-        if (!iframe) {
-          iframe = document.createElement('iframe');
-          iframe.id = iframeName;
-          iframe.name = iframeName;
-          iframe.style.display = 'none';
-          document.body.appendChild(iframe);
+        const payload = JSON.stringify({ t: timeMin, tex: raw });
+        // Gửi lên dpaste để lấy mã ngắn (mã tồn tại 30 ngày)
+        const res = await fetch("https://dpaste.com/api/", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ content: payload, expiry_days: 30 })
+        });
+
+        if (res.ok) {
+          const rawUrl = (await res.text()).trim(); // Dạng: https://dpaste.com/ABCXYZ
+          const pasteId = rawUrl.split('/').filter(Boolean).pop();
+          
+          // Link ngắn gọn của thầy
+          const shortUrl = `${window.location.origin}${window.location.pathname}?id=${pasteId}`;
+          
+          document.getElementById('share-link-input').value = shortUrl;
+          document.getElementById('box-share-link').classList.remove('hidden');
+          await loadExamFromText(raw, timeMin);
+        } else {
+          alert("Lỗi máy chủ rút gọn link, hãy thử lại!");
         }
-
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = GOOGLE_SCRIPT_URL;
-        form.target = iframeName;
-
-        const pData = {
-          action: "save_exam",
-          examId: examId,
-          time: timeMin,
-          tex: raw
-        };
-
-        for (const k in pData) {
-          const inp = document.createElement('input');
-          inp.type = 'hidden';
-          inp.name = k;
-          inp.value = pData[k];
-          form.appendChild(inp);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-        setTimeout(() => document.body.removeChild(form), 1000);
-
-        // Sinh link rút gọn gửi cho học sinh
-        const cleanUrl = `${window.location.origin}${window.location.pathname}?de=${examId}`;
-        document.getElementById('share-link-input').value = cleanUrl;
-        document.getElementById('box-share-link').classList.remove('hidden');
-
-        // Biên dịch hiển thị xem trước
-        await loadExamFromText(raw, timeMin);
       } catch (err) {
-        alert("Lỗi khi kết nối lưu đề!");
+        alert("Không thể kết nối dịch vụ rút gọn: " + err.message);
       } finally {
         loader.classList.add('hidden');
         loader.classList.remove('flex');
@@ -299,34 +302,7 @@
       });
     }
 
-    // Kéo thả file .tex
-    const dropZone = document.getElementById('drop-zone');
-    ['dragenter', 'dragover'].forEach(name => {
-      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-600', 'bg-indigo-100/50'); });
-    });
-    ['dragleave', 'drop'].forEach(name => {
-      dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('border-indigo-600', 'bg-indigo-100/50'); });
-    });
-    dropZone.addEventListener('drop', (e) => {
-      const files = e.dataTransfer.files;
-      if (files.length > 0) readTexFile(files[0]);
-    });
-
-    function handleFileSelect(e) {
-      if (e.target.files.length > 0) readTexFile(e.target.files[0]);
-    }
-
-    function readTexFile(file) {
-      const reader = new FileReader();
-      reader.onload = async (event) => {
-        const text = event.target.result;
-        document.getElementById('latex-code').value = text;
-        await handleBuildAndGenerateShareLink();
-      };
-      reader.readAsText(file);
-    }
-
-    // Stack Parser bóc tách ngoặc
+    // Stack Parser đếm ngoặc sâu
     function extractBracedBlocks(text, startIndex = 0) {
       let blocks = [];
       let depth = 0;
@@ -475,21 +451,7 @@ ${cleanedTikz}
     }
 
     async function loadExamFromText(source, minutes = 45) {
-      const loader = document.getElementById('parse-loading');
-      document.getElementById('loading-msg').innerText = "Đang biên dịch đề và dựng hình TikZ...";
-      loader.classList.remove('hidden');
-      loader.classList.add('flex');
-
       examData = await parseLatexExam(source);
-
-      loader.classList.add('hidden');
-      loader.classList.remove('flex');
-
-      if (examData.length === 0) {
-        alert("Không nhận diện được câu hỏi nào trong đề!");
-        return;
-      }
-
       timeTotalSec = minutes * 60;
       document.getElementById('lbl-q-count').innerText = examData.length;
     }
@@ -790,35 +752,39 @@ ${cleanedTikz}
       renderMath(container);
     }
 
-    // 2. TỰ ĐỘNG TẢI ĐỀ TỪ GOOGLE KHI HỌC SINH MỞ LINK CÓ ?de=...
+    // --- KHI TRANG TẢI ---
     window.onload = async function() {
       const urlParams = new URLSearchParams(window.location.search);
-      const examId = urlParams.get('de');
+      const pasteId = urlParams.get('id');
 
-      if (examId) {
-        // Học sinh vào bằng link: Ẩn hoàn toàn bảng nạp đề
-        const adminPanel = document.getElementById('panel-admin');
-        const adminBtn = document.getElementById('btn-open-admin');
-        if (adminPanel) adminPanel.classList.add('hidden');
-        if (adminBtn) adminBtn.classList.add('hidden');
+      // Nếu là học sinh vào bằng link ngắn: ?id=...
+      if (pasteId) {
+        // Ẩn thanh quản trị của giáo viên
+        document.getElementById('panel-admin').classList.add('hidden');
+        document.getElementById('btn-open-admin').classList.add('hidden');
+
+        const sLoader = document.getElementById('student-loading');
+        sLoader.classList.remove('hidden');
 
         try {
-          const res = await fetch(`${GOOGLE_SCRIPT_URL}?de=${examId}`);
-          const data = await res.json();
-          if (data && data.tex) {
-            await loadExamFromText(data.tex, data.t || 45);
+          // Lấy nội dung đề tương ứng từ dpaste
+          const res = await fetch(`https://dpaste.com/${pasteId}.txt`);
+          if (res.ok) {
+            const rawContent = await res.text();
+            const data = JSON.parse(rawContent);
+            await loadExamFromText(data.tex, data.t);
           } else {
-            alert("Không tìm thấy dữ liệu đề thi này hoặc đề đã hết hạn!");
+            alert("Không tìm thấy đề thi này hoặc đề đã quá hạn 30 ngày!");
           }
         } catch (e) {
-          alert("Lỗi tải đề thi từ máy chủ, học sinh vui lòng bấm tải lại trang!");
+          alert("Lỗi tải đề thi, vui lòng thử lại!");
+        } finally {
+          sLoader.classList.add('hidden');
         }
       } else {
-        // Giáo viên vào link gốc: Mở khung nạp đề
-        const adminPanel = document.getElementById('panel-admin');
-        if (adminPanel) adminPanel.classList.remove('hidden');
-        document.getElementById('latex-code').value = SAMPLE_EXAM_SOURCE;
-        await loadExamFromText(SAMPLE_EXAM_SOURCE, 45);
+        // Giáo viên vào link gốc: mở khung nạp đề
+        document.getElementById('latex-code').value = DEFAULT_LATEX_SOURCE;
+        await loadExamFromText(DEFAULT_LATEX_SOURCE, 45);
       }
 
       lucide.createIcons();
