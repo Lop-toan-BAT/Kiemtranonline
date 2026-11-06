@@ -397,31 +397,45 @@
     // Nạp đầy đủ thư viện angles, quotes, patterns cho TikZ
     async function convertTikzToSvg(rawTikz) {
       try {
-        const cleanedTikz = autoFixTikzCode(rawTikz);
+        let cleanTikz = rawTikz
+          .replace(/\\begin\{center\}/g, '')
+          .replace(/\\end\{center\}/g, '')
+          .replace(/\\colon/g, ':')
+          .trim();
+
+        // 1. Khung tài liệu TeX đầy đủ gói xcolor, angles, quotes, calc
         const fullDoc = `\\documentclass[tikz,border=4pt]{standalone}
 \\usepackage{amsmath,amssymb}
+\\usepackage[svgnames]{xcolor}
 \\usepackage{tikz}
 \\usepackage{pgfplots}
 \\pgfplotsset{compat=1.18}
-\\usetikzlibrary{calc,arrows.meta,intersections,angles,quotes,patterns}
+\\usetikzlibrary{calc,arrows.meta,intersections,angles,quotes,patterns,positioning}
 \\begin{document}
-${cleanedTikz}
+${cleanTikz}
 \\end{document}`;
 
+        // 2. Nén Deflate sang URL-safe Base64 cho Kroki
         const bytes = new TextEncoder().encode(fullDoc);
         const deflated = pako.deflate(bytes, { level: 9 });
         let binary = '';
-        for (let i = 0; i < deflated.byteLength; i++) binary += String.fromCharCode(deflated[i]);
-        const base64Url = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        for (let i = 0; i < deflated.byteLength; i++) {
+          binary += String.fromCharCode(deflated[i]);
+        }
+        const base64Url = btoa(binary)
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
 
+        // 3. Trả về thẻ img nhúng trực tiếp SVG
         return `<div class="my-4 flex justify-center overflow-x-auto w-full">
                   <img src="https://kroki.io/tikz/svg/${base64Url}" alt="Hình vẽ hình học" class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm max-w-full h-auto" loading="lazy" />
                 </div>`;
       } catch (err) {
+        console.error("Lỗi dựng TikZ:", err);
         return `<div class="my-3 p-2 bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center rounded">[Lỗi dựng hình TikZ]</div>`;
       }
     }
-
     async function parseLatexExam(rawSource) {
       // 1. Chuyển đổi môi trường enumerate trước
       let textConverted = convertEnumerateToHtml(rawSource);
