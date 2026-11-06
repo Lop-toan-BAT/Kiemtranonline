@@ -39,6 +39,17 @@
       </div>
     </div>
   </header>
+<style>
+  .img-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    max-height: 200px;
+    height: auto;
+    width: auto;
+    object-fit: contain;
+  }
+</style>
 
   <main class="max-w-4xl mx-auto p-4 flex-1 w-full">
 
