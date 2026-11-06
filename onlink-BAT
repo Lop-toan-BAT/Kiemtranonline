@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kiểm Tra Trực Tuyến - Lớp Toán BAT</title>
+  <title>Lớp Toán BAT</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- KaTeX -->
@@ -23,7 +23,7 @@
       <div class="flex items-center gap-2">
         <i data-lucide="calculator" class="w-7 h-7"></i>
         <div>
-          <h1 class="text-base sm:text-lg font-bold leading-tight">TOÁN THPT - KIỂM TRA TRỰC TUYẾN</h1>
+          <h1 class="text-base sm:text-lg font-bold leading-tight">KIỂM TRA TRỰC TUYẾN</h1>
           <p class="text-xs text-indigo-200">Trắc nghiệm • Đúng/Sai • Trả lời ngắn • TikZ Angles</p>
         </div>
       </div>
